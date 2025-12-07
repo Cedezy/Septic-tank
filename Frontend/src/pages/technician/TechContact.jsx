@@ -23,7 +23,6 @@ const TechContact = () => {
             <div className="max-w-7xl mx-auto md:py-8">
                 {contactData && (
                     <div className="space-y-8">
-                        {/* Header Section */}
                         <div className="relative overflow-hidden rounded-sm bg-green-500 p-12 shadow-sm">
                             <div className="absolute inset-0 bg-black opacity-5"></div>
                             <div className="relative">

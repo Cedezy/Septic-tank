@@ -7,7 +7,7 @@ const calculateAge = require('../util/calculateAge');
 
 exports.signup = async (req, res) => {
     try {
-        const { fullname, email, password, city, barangay, street, phone, birthdate } = req.body;
+        const { fullname, email, password, city, barangay, street, phone, birthdate, gender } = req.body;
 
         const existingUser = await User.findOne({ email });
         if(existingUser && existingUser.isVerified){
@@ -23,7 +23,6 @@ exports.signup = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const age = calculateAge(birthdate); 
-
         if(age < 18){
             return res.status(400).json({ success: false, message: "You must be at least 18 years old!" });
         }
@@ -38,7 +37,8 @@ exports.signup = async (req, res) => {
             barangay,
             street,
             birthdate,
-            age, 
+            age,
+            gender,
             otp,
             otpExpiry: new Date(Date.now() + 10 * 60 * 1000),
             isVerified: false
@@ -49,7 +49,7 @@ exports.signup = async (req, res) => {
         res.status(201).json({
             message: 'Signup successful! OTP sent to your email.',
             success: true,
-            user: { email: newUser.email, age: newUser.age, isVerified: newUser.isVerified }
+            user: { email: newUser.email, age: newUser.age, gender: newUser.gender, isVerified: newUser.isVerified }
         });
     } catch (err) {
         res.status(500).json({ success: false, message: 'Signup failed.' });
@@ -147,7 +147,7 @@ exports.resendOtp = async (req, res) => {
 
         await sendOtp(email, otp);
 
-        res.status(200).json({ message: 'OTP resent successfully.', success: true });
+        res.status(200).json({ message: 'OTP resent successfully to your email.', success: true });
     } 
     catch(err){
         res.status(500).json({ message: 'Failed to resend OTP.', success: false });
@@ -180,7 +180,7 @@ exports.forgotPassword = async (req, res) => {
         await user.save();
         await sendOtp(email, otp, 'reset');
 
-        res.status(200).json({ message: "OTP sent successfully", success: true });
+        res.status(200).json({ message: "OTP sent successfully to your email.", success: true });
     }
     catch(err){
         res.status(500).json({ message: "Error sending OTP", success: false });

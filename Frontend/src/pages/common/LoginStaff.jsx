@@ -15,6 +15,18 @@ const LoginStaff = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email.trim())) {
+            toast.error("Please enter a valid email address");
+            return;
+        }
+
+        if (password.trim() === "") {
+            toast.error("Password is required");
+            return;
+        }
+
         setIsLoading(true);
         try{
             const response = await axios.post('/auth/login', {
@@ -84,7 +96,6 @@ const LoginStaff = () => {
                                         type="email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        required
                                         placeholder="Enter your email"
                                         className="w-full pl-12 pr-4 py-3 text-sm bg-white/5 border border-gray-400 rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300"
                                     />
@@ -100,7 +111,6 @@ const LoginStaff = () => {
                                         type={showPassword ? 'text' : 'password'}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        required
                                         placeholder="Enter your password"
                                         className="w-full pl-12 pr-12 py-3 text-sm bg-white/5 border border-gray-400 rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300"
                                     />

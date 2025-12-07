@@ -52,4 +52,27 @@ body {
   animation: fadeOutScale 0.3s ease-in forwards;
 }
 
-/* Disable page scrolling */
+/* Disable page scrolling */@media print {
+  body * {
+    visibility: hidden; /* hide everything */
+  }
+
+  #printable-receipt, #printable-receipt * {
+    visibility: visible; /* show only the receipt */
+  }
+
+  #printable-receipt {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-width: none;
+    max-height: none;
+    overflow: visible;
+  }
+
+  /* optional: remove modal overlay background for print */
+  #printable-receipt {
+    box-shadow: none;
+  }
+}

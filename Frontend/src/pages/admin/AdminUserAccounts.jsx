@@ -32,8 +32,9 @@ const AdminUserAccounts = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [selectedUser, setSelectedUser] = useState(null);
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [selectedUserToDelete, setSelectedUserToDelete] = useState(null);
+    const [showDeactivateModal, setShowDeacticateModal] = useState(false);
+    const [selectedUserToDiactivate, setSelectedUserToDiactivate] = useState(null);
+    const [isModalInfoOpen, setIsModalInfoOpen] = useState(false);
     const [formData, setFormData] = useState({
         fullname: '',
         email: '',
@@ -132,7 +133,7 @@ const AdminUserAccounts = () => {
         }
 
         try{
-            const dataToSubmit = { ...formData, role: 'manager' };
+            const dataToSubmit = { ...formData };
 
             if(editingId) {
                 const response = await axios.put(`/user/${editingId}`, dataToSubmit, { 
@@ -156,9 +157,9 @@ const AdminUserAccounts = () => {
         }
     }; 
 
-    const handleDelete = async (id) => {
+    const handleDeactivate  = async (id) => {
         try{
-            const response = await axios.delete(`/user/${id}`, { 
+            const response = await axios.put(`/user/deactivate/${id}`, {}, {
                 withCredentials: true
             });
             toast.success(response.data.message);
@@ -169,19 +170,43 @@ const AdminUserAccounts = () => {
                 toast.error(err.response.data.message); 
             } 
             else{
-                toast.error("Failed to delete customer.");
+                toast.error("Failed to deactivate user.");
             }
         }
     };
 
-    const openDeleteModal = (user) => {
-        setSelectedUserToDelete(user);
-        setShowDeleteModal(true);
+    const handleReactivate = async (id) => {
+        try {
+            const response = await axios.put(
+                `/user/reactivate/${id}`,
+                {},
+                { withCredentials: true }
+            );
+
+            // Show success message
+            toast.success(response.data.message);
+
+            // Refresh user list
+            fetchUsers();
+
+        } catch (err) {
+            // Show error message
+            if (err.response?.data?.message) {
+                toast.error(err.response.data.message);
+            } else {
+                toast.error("Failed to reactivate user.");
+            }
+        }
     };
 
-    const closeDeleteModal = () => {
-        setShowDeleteModal(false);
-        setSelectedUser(null);
+
+    const closeDeactivateModal = () => {
+        setShowDeacticateModal(false)
+    }
+
+    const openDeactivateModal = (user) => {
+        setSelectedUserToDiactivate(user);
+        setShowDeacticateModal(true);
     };
 
     const roles = [
@@ -222,7 +247,7 @@ const AdminUserAccounts = () => {
                                                 Contact number
                                             </th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Role
+                                                USER TYPE
                                             </th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Registered Date
@@ -261,10 +286,19 @@ const AdminUserAccounts = () => {
                                                 const RoleIcon = roleConfig.icon;
                                                 
                                                 return (
-                                                    <tr key={user._id}
-                                                    onClick={() => setSelectedUser(user)}
-                                                    className={`cursor-pointer transition ${selectedUser?._id === user._id ? 'bg-green-100' : 'hover:bg-gray-100 ease-in-out duration-300'
-                                                }`}>
+                                                    <tr
+                                                        key={user._id}
+                                                        onClick={() => setSelectedUser(user)}
+                                                        onDoubleClick={() => {
+                                                            setSelectedUser(user);
+                                                            setIsModalInfoOpen(true);
+                                                        }}
+                                                        className={`cursor-pointer transition 
+                                                            ${selectedUser?._id === user._id ? 'bg-green-100' : 'hover:bg-gray-100 ease-in-out duration-300'}
+                                                            ${!user.isActive ? 'opacity-50 bg-gray-200' : ''}
+                                                        `}
+                                                    >
+
                                                         <td className="px-6 py-5 text-sm font-medium text-gray-800">
                                                             {user.fullname}
                                                         </td>
@@ -306,19 +340,34 @@ const AdminUserAccounts = () => {
                                     title="Edit User"
                                     onClick={() => openEditModal(selectedUser)}
                                     disabled={!selectedUser}
-                                    className="group flex items-center gap-2 px-6 py-2.5 rounded-sm bg-green-500 hover:bg-green-600 text-white disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md font-medium text-sm cursor-pointer"
+                                    className="px-6 py-2.5 rounded-sm bg-green-500 hover:bg-green-600 text-white disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md font-bold text-sm cursor-pointer"
                                 >
-                                    Edit
+                                    EDIT
                                 </button>
-                                <button
-                                    title="Delete User"
-                                    onClick={() => openDeleteModal(selectedUser)}
-                                    disabled={!selectedUser}
-                                    className="group flex items-center gap-2 px-6 py-2.5 rounded-sm bg-red-500 hover:bg-red-600 text-white disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md font-medium text-sm cursor-pointer"
-                                >
-                                    Delete
-                                </button>
+
+                                {/* IF ACTIVE → Show DEACTIVATE */}
+                                {selectedUser?.isActive ? (
+                                    <button
+                                        title="Deactivate User"
+                                        onClick={() => openDeactivateModal(selectedUser)}
+                                        disabled={!selectedUser}
+                                        className="px-6 py-2.5 rounded-sm bg-red-500 hover:bg-red-600 text-white disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md font-bold text-sm cursor-pointer"
+                                    >
+                                        DEACTIVATE
+                                    </button>
+                                ) : (
+                                /* IF NOT ACTIVE → Show REACTIVATE */
+                                    <button
+                                        title="Reactivate User"
+                                        onClick={() => openDeactivateModal(selectedUser)}
+                                        disabled={!selectedUser}
+                                        className="px-6 py-2.5 rounded-sm bg-blue-500 hover:bg-blue-600 text-white disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md font-bold text-sm cursor-pointer"
+                                    >
+                                        REACTIVATE
+                                    </button>
+                                )}
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -337,12 +386,6 @@ const AdminUserAccounts = () => {
                                         {editingId ? "Edit User Account" : "Create New User Account"}
                                     </h3>
                                 </div>
-                                <button
-                                    type="button"
-                                    onClick={() => setIsModalOpen(false)}
-                                    className="text-gray-300 hover:text-white hover:bg-green-500 rounded-full p-2 transition-all duration-200 cursor-pointer">
-                                    <X className="w-5 h-5" />
-                                </button>
                             </div>
                         </div>
 
@@ -573,13 +616,33 @@ const AdminUserAccounts = () => {
                                 </div>
 
                                 {!editingId && (
-                                    <div>
-                                        <div className="flex items-center mb-4">
-                                            <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                                            <h4 className="text-sm font-semibold text-gray-700 uppercase">Account Permissions</h4>
-                                        </div>
-                                    </div>
-                                )}
+  <div>
+        <div className="flex items-center mb-4">
+        <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+        <h4 className="text-sm font-semibold text-gray-700 uppercase">Account Permissions</h4>
+        </div>
+        <div>
+        <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
+            <span className="bg-gray-100 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-gray-600 mr-2">11</span>
+            User Type
+            <span className="text-red-500 ml-1">*</span>
+        </label>
+        <select
+            name="role"
+            value={formData.role}
+            onChange={handleInputChange}
+            required
+            className="w-full text-sm pl-3 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 text-gray-800"
+        >
+            <option value="">Select user type</option>
+            <option value="manager">Manager</option>
+            <option value="technician">Technician</option>
+        </select>
+        <p className="text-xs text-gray-500 mt-1">Choose the account type</p>
+        </div>
+    </div>
+)}
+
                             </form>
                         </div>
 
@@ -608,56 +671,181 @@ const AdminUserAccounts = () => {
                     </div>
                 </div>
             )}
+
+            {isModalInfoOpen && selectedUser && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
+                    <div className="bg-white rounded-sm shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-fade-in">
+                    
+                    {/* Header */}
+                    <div className="bg-green-600 px-6 py-4 flex items-center gap-3">
+                        <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                        <Users className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                        <h3 className="text-xl font-medium text-gray-50 tracking-tight">{selectedUser.fullname}</h3>
+                        </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="px-8 pt-6 pb-4 overflow-y-auto max-h-[calc(90vh-180px)]">
+                        <div className="space-y-4">
+
+                        <div className="grid grid-cols-3 gap-x-4 py-3 border-b border-gray-100">
+                            <span className="text-sm font-medium text-gray-500">Registration Date</span>
+                            <span className="col-span-2 text-sm text-gray-900">{formatDate(selectedUser.createdAt)}</span>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-x-4 py-3 border-b border-gray-100">
+                            <span className="text-sm font-medium text-gray-500">Email Address</span>
+                            <span className="col-span-2 text-sm text-gray-900">{selectedUser.email}</span>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-x-4 py-3 border-b border-gray-100">
+                            <span className="text-sm font-medium text-gray-500">Contact Number</span>
+                            <span className="col-span-2 text-sm text-gray-900">{selectedUser.phone}</span>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-x-4 py-3 border-b border-gray-100">
+                            <span className="text-sm font-medium text-gray-500">User Type</span>
+                            <span className="col-span-2 text-sm text-gray-900 capitalize">{selectedUser.role}</span>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-x-4 py-3 border-b border-gray-100">
+                            <span className="text-sm font-medium text-gray-500">Birth Date</span>
+                            <span className="col-span-2 text-sm text-gray-900">{formatDate(selectedUser.birthdate)}</span>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-x-4 py-3">
+                            <span className="text-sm font-medium text-gray-500">Complete Address</span>
+                            <span className="col-span-2 text-sm text-gray-900">
+                            {selectedUser.street} {selectedUser.barangay}, {selectedUser.city}, {selectedUser.province}
+                            </span>
+                        </div>
+
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="border-t border-gray-200 px-4 py-4 flex justify-end">
+                        <button
+                        type="button"
+                        onClick={() => {
+                            setIsModalInfoOpen(false);
+                            setSelectedUser(null);
+                        }}
+                        className="px-6 py-2 border-2 border-gray-400 text-gray-700 rounded-sm hover:border-gray-500 transition cursor-pointer text-sm"
+                        >
+                        Close
+                        </button>
+                    </div>
+                    </div>
+                </div>
+            )}
+
+
             
-            {showDeleteModal && selectedUserToDelete && (
+            {showDeactivateModal && selectedUserToDiactivate && (
                 <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4">
                     <div className="bg-white rounded-sm shadow-2xl max-w-md w-full animate-fade-in relative transform transition-all duration-300 scale-100 border border-gray-100">
-                            
+                        
                         <div>
                             <div className="p-6 text-center">
-                                <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
-                                    <AlertTriangle className="w-8 h-8 text-red-600" />
+                                <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center 
+                                    ${selectedUserToDiactivate.isActive ? "bg-yellow-100" : "bg-blue-100"}`}>
+                                    <AlertTriangle 
+                                        className={`w-8 h-8 
+                                            ${selectedUserToDiactivate.isActive ? "text-yellow-600" : "text-blue-600"}`} 
+                                    />
                                 </div>
-                                <h3 className="text-xl font-semibold text-gray-900 mb-2">Delete User Account</h3>
+
+                                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                                    {selectedUserToDiactivate.isActive
+                                        ? "Deactivate User Account"
+                                        : "Reactivate User Account"}
+                                </h3>
+
                                 <p className="text-gray-600 mb-6">
-                                    You are about to delete the account for{' '}
-                                    <span className="font-semibold text-gray-900">{selectedUserToDelete.fullname}</span>
+                                    You are about to{" "}
+                                    <span className="font-semibold">
+                                        {selectedUserToDiactivate.isActive ? "deactivate" : "reactivate"}
+                                    </span>{" "}
+                                    the account for{" "}
+                                    <span className="font-semibold text-gray-900">
+                                        {selectedUserToDiactivate.fullname}
+                                    </span>
                                 </p>
-                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+
+                                {/* Info Box */}
+                                <div className={`border rounded-lg p-4 mb-6 
+                                    ${selectedUserToDiactivate.isActive 
+                                        ? "bg-yellow-50 border-yellow-200" 
+                                        : "bg-blue-50 border-blue-200"}`}>
+                                    
                                     <div className="flex items-start space-x-3">
-                                        <Shield className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                                        <Shield 
+                                            className={`w-5 h-5 mt-0.5 flex-shrink-0
+                                                ${selectedUserToDiactivate.isActive ? "text-yellow-600" : "text-blue-600"}`} 
+                                        />
                                         <div className="text-left">
-                                            <h4 className="text-sm font-medium text-yellow-800 mb-1">
-                                                Before you proceed:
+                                            <h4 className={`text-sm font-medium mb-1
+                                                ${selectedUserToDiactivate.isActive ? "text-yellow-800" : "text-blue-800"}`}>
+                                                Please note:
                                             </h4>
-                                            <ul className="text-sm text-yellow-700 space-y-1">
-                                                <li>• All user data will be permanently deleted</li>
-                                                <li>• This action cannot be undone</li>
-                                                <li>• User will lose access immediately</li>
+
+                                            <ul className="text-sm space-y-1">
+                                                {selectedUserToDiactivate.isActive ? (
+                                                    <>
+                                                        <li>• User account will be disabled</li>
+                                                        <li>• User will not be able to log in</li>
+                                                        <li>• You can reactivate anytime</li>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <li>• User account will be restored</li>
+                                                        <li>• User will regain access</li>
+                                                        <li>• You can deactivate anytime</li>
+                                                    </>
+                                                )}
                                             </ul>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Buttons */}
                             <div className="flex space-x-2 px-6 pb-6">
                                 <button
-                                    onClick={closeDeleteModal}
-                                    className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all duration-200 font-medium cursor-pointer text-sm">
+                                    onClick={closeDeactivateModal}
+                                    className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 font-medium text-sm"
+                                >
                                     Cancel
                                 </button>
+
                                 <button
                                     onClick={() => {
-                                        handleDelete(selectedUserToDelete._id);
-                                        closeDeleteModal();
+                                        if (selectedUserToDiactivate.isActive) {
+                                            handleDeactivate(selectedUserToDiactivate._id);
+                                        } else {
+                                            handleReactivate(selectedUserToDiactivate._id);
+                                        }
+                                        closeDeactivateModal();
+                                        setSelectedUser(null)
                                     }}
-                                    className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-sm hover:bg-red-700 transition-colors duration-200 font-medium cursor-pointer text-sm">
-                                    Delete
+                                    className={`flex-1 px-4 py-2.5 text-white rounded-sm transition-colors duration-200 font-medium text-sm
+                                        ${selectedUserToDiactivate.isActive 
+                                            ? "bg-yellow-600 hover:bg-yellow-700"
+                                            : "bg-blue-600 hover:bg-blue-700"}`}
+                                >
+                                    {selectedUserToDiactivate.isActive ? "Deactivate" : "Reactivate"}
                                 </button>
                             </div>
-                        </div>         
+                        </div>
+
                     </div>
                 </div>
             )}
+
+
         </div>
     );
 }

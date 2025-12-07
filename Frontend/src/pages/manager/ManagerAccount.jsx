@@ -136,6 +136,7 @@ const ManagerAccount = () => {
             setShowPasswordModal(false);
         }
         catch(err){
+            toast.error(err.response?.data?.message);
             console.log(err);
         } 
         finally {
@@ -172,7 +173,7 @@ const ManagerAccount = () => {
                                     </div>
                                     <button
                                         onClick={() => setShowEditModal(true)}
-                                        className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-sm cursor-pointer ease-in-out duration-300 shadow-lg hover:shadow-xl"
+                                        className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-sm cursor-pointer ease-in-out duration-300"
                                     >
                                         <Edit className="w-4 h-4 mr-2" />
                                         Edit Profile
@@ -248,7 +249,7 @@ const ManagerAccount = () => {
                                     </div>
                                     <button
                                         onClick={() => setShowPasswordModal(true)}
-                                        className="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md cursor-pointer transition-colors duration-200 shadow-lg hover:shadow-xl"
+                                        className="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md cursor-pointer transition-colors duration-200"
                                     >
                                         <Lock className="w-4 h-4 mr-2" />
                                         Change Password
@@ -287,12 +288,6 @@ const ManagerAccount = () => {
                                         <p className="text-sm text-gray-300">Update your personal details</p>
                                     </div>
                                 </div>
-                                <button
-                                    type="button"
-                                    onClick={() => setShowEditModal(false)}
-                                    className="text-gray-300 hover:text-white hover:bg-green-500 rounded-full p-2 transition-all duration-200 cursor-pointer">
-                                    <X className="w-5 h-5" />
-                                </button>
                             </div>
                         </div>
 
@@ -308,20 +303,18 @@ const ManagerAccount = () => {
                                             <label className="text-sm font-semibold text-gray-700 mb-2 block">Full Name</label>
                                             <input
                                                 type="text"
-                                                className="w-full px-4 py-3 text-sm border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200"
+                                                className="w-full px-4 py-3 text-sm border-2 border-gray-200 rounded-lg bg-gray-50"
                                                 value={formData.fullname}
-                                                onChange={(e) => handleInputChange('fullname', e.target.value)}
-                                                disabled={isSubmitting}
+                                                disabled
                                             />
                                         </div>
                                         <div>
                                             <label className="text-sm font-semibold text-gray-700 mb-2 block">Email Address</label>
                                             <input
                                                 type="email"
-                                                className="w-full px-4 py-3 text-sm border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200"
+                                                disabled
+                                                className="w-full px-4 py-3 text-sm border-2 border-gray-200 rounded-lg bg-gray-50"
                                                 value={formData.email}
-                                                onChange={(e) => handleInputChange('email', e.target.value)}
-                                                disabled={isSubmitting}
                                             />
                                         </div>
                                         <div>
@@ -419,12 +412,11 @@ const ManagerAccount = () => {
                 </div>
             )}
 
-            {/* Change Password Modal */}
             {showPasswordModal && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-                    <div className="bg-white rounded-sm shadow-2xl w-full max-w-xl animate-fade-in mx-auto flex flex-col max-h-[90vh] overflow-hidden">
+                    <div className="bg-white rounded-sm shadow-2xl w-full max-w-md animate-fade-in mx-auto flex flex-col max-h-[90vh] overflow-hidden">
                         <div className="bg-green-600 px-6 py-4 flex-shrink-0">
-                            <div className="flex items-center justify-between">
+                            <div className="flex">
                                 <div className="flex items-center space-x-3">
                                     <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
                                         <Lock className="w-4 h-4 text-white" />
@@ -434,12 +426,6 @@ const ManagerAccount = () => {
                                         <p className="text-sm text-gray-300">Update your account security</p>
                                     </div>
                                 </div>
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPasswordModal(false)}
-                                    className="text-gray-300 hover:text-white hover:bg-green-500 rounded-full p-2 transition-all duration-200 cursor-pointer">
-                                    <X className="w-5 h-5" />
-                                </button>
                             </div>
                         </div>
 
@@ -481,7 +467,7 @@ const ManagerAccount = () => {
                                     )}
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4">
                                     <div className="relative">
                                         <label className="text-sm font-semibold text-gray-700 mb-2 block">
                                             New Password

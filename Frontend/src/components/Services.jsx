@@ -32,6 +32,7 @@ const Services = ({ showHomeOnly = false }) => {
         time: '',
         notes: '',
     });
+    const [showDropdown, setShowDropdown] = useState(false);
 
     const handleScheduleClick = (service) => {
         if(!currentUser) {
@@ -91,11 +92,6 @@ const Services = ({ showHomeOnly = false }) => {
             fetchAvailableTimes(value); 
         }
     };
-
-    const handleTankSizeChange = (size) => {
-        setTankSize(size.toLowerCase());
-    };
-
 
     const handleContinueToSummary = (e) => {
         e.preventDefault();
@@ -254,7 +250,15 @@ const Services = ({ showHomeOnly = false }) => {
     return (
         <div className='bg-gray-50 pt-28'>
             <div className="pb-10">
-                <div className="max-w-4xl mx-auto text-center px-4">
+                <div className="max-w-4xl mx-auto text-center space-y-4">
+                     <button 
+                        type="button"
+                        onClick={() => navigate(-1)}
+                        className="text-gray-600 hover:text-gray-800 flex items-center gap-1 ml-6"
+                        >
+                        <span className="text-xl">←</span>
+                        <span className="text-md font-medium">Back</span>
+                    </button>
                     <h1 className="text-4xl md:text-5xl text-gray-800 mb-6 uppercase tracking-tight">
                         Plan Your Septic Service
                     </h1>
@@ -263,7 +267,7 @@ const Services = ({ showHomeOnly = false }) => {
                     </p>
                 </div>
             </div>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+            <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 pb-16">
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     {services
                     .filter(service => service.status === 'Active' && (!showHomeOnly || service.showOnHome))
@@ -337,7 +341,7 @@ const Services = ({ showHomeOnly = false }) => {
             </div>
 
             {selectedService && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
+                <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
                     <div className="bg-white rounded-sm shadow-2xl w-full max-w-2xl animate-fade-in mx-auto flex flex-col max-h-[90vh] overflow-hidden">
                         {step === 1 ? (
                             <>
@@ -382,7 +386,7 @@ const Services = ({ showHomeOnly = false }) => {
                                                 <h4 className="text-sm font-semibold text-gray-700 uppercase">Booking Details</h4>
                                             </div>
                                             
-                                            <div className="grid grid-cols-2 gap-4">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 <div>
                                                     <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
                                                         <span className="bg-gray-100 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-gray-600 mr-2">1</span>
@@ -397,78 +401,61 @@ const Services = ({ showHomeOnly = false }) => {
                                                             name="date"
                                                             value={formData.date}
                                                             onChange={(e) => handleDateChange(new Date(e.target.value))}
-                                                            min={new Date().toISOString().split("T")[0]} 
+                                                           
                                                             className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 text-sm"
                                                         />
                                                     </div>
                                                     <p className="text-xs text-gray-500 mt-1">Choose your preferred service date</p>
                                                 </div>
-                                                <div>
+                                                {/* Time Picker Trigger */}
+                                                    <div className="relative w-full">
                                                     <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
-                                                        <span className="bg-gray-100 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-gray-600 mr-2">2</span>
-                                                        Time
-                                                        <span className="text-red-500 ml-1">*</span>
+                                                        Time <span className="text-red-500 ml-1">*</span>
                                                     </label>
-                                                    <div className="relative">
-                                                        <Clock className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
-                                                        <select
-                                                            name="time"
-                                                            value={formData.time}
-                                                            onChange={handleInputChange}
-                                                            required
-                                                            className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 text-sm cursor-pointer"
-                                                        >
-                                                            <option value="">Select time...</option>
-                                                            {availableTimeSlots.map((slot) => (
-                                                                <option key={slot} value={slot}>{slot}</option>
-                                                            ))}
-                                                        </select>
+                                                    <div
+                                                        className="w-full border-2 border-gray-200 rounded-lg py-3 px-4 cursor-pointer relative"
+                                                        onClick={() => setShowDropdown(true)}
+                                                    >
+                                                        {formData.time || "Select time..."}
                                                     </div>
-                                                    <p className="text-xs text-gray-500 mt-1">Available time slots</p>
-                                                </div>
+                                                    </div>
+
+                                                    {/* Time Selection Modal */}
+                                                    {showDropdown && (
+                                                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                                                        <div className="bg-white rounded-lg w-full max-w-md p-4">
+                                                        <div className="flex justify-between items-center mb-4">
+                                                            <h3 className="text-lg font-semibold">Select Time</h3>
+                                                            <button
+                                                            onClick={() => setShowDropdown(false)}
+                                                            className="text-gray-500 hover:text-gray-700"
+                                                            >
+                                                            ✕
+                                                            </button>
+                                                        </div>
+
+                                                        <div className="flex flex-col gap-1 max-h-80 overflow-y-auto">
+                                                            {availableTimeSlots.map((slot) => (
+                                                            <button
+                                                                key={slot}
+                                                                onClick={() => {
+                                                                setFormData({ ...formData, time: slot });
+                                                                setShowDropdown(false);
+                                                                }}
+                                                                className="w-full border py-3 px-4 bg-gray-50 text-slate-900 rounded-lg hover:bg-gray-100 transition-all text-center font-medium"
+                                                            >
+                                                                {slot}
+                                                            </button>
+                                                            ))}
+                                                        </div>
+                                                        </div>
+                                                    </div>
+                                                    )}
+
+
+
                                             </div>
                                         </div>
-
-                                        {selectedService.hasTankSize && (
-                                            <div>
-                                                <div className="flex items-center mb-2">
-                                                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                                                    <h4 className="text-sm font-semibold text-gray-700 uppercase">Tank Options</h4>
-                                                </div>
-                                                <div>
-                                                    <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
-                                                        <span className="bg-gray-100 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-gray-600 mr-2">3</span>
-                                                        Tank Size
-                                                        <span className="text-red-500 ml-1">*</span>
-                                                    </label>
-                                                    <div className="grid grid-cols-2 gap-3">
-                                                        {Object.keys(selectedService.tankOptions || {}).map((size) => (
-                                                            <button
-                                                                type="button"
-                                                                key={size}
-                                                                onClick={() => handleTankSizeChange(size)}
-                                                                className={`p-3 rounded-lg border-2 text-sm font-medium transition-all duration-200 cursor-pointer ${
-                                                                    tankSize === size
-                                                                        ? "bg-green-50 text-green-700 border-green-500"
-                                                                        : "bg-white text-gray-700 border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                                                                }`}
-                                                            >
-                                                                <span className="font-semibold capitalize">
-                                                                    {size} ({selectedService.tankOptions[size].capacity} Liters)
-                                                                </span>
-                                                                <div className="text-xs mt-1">
-                                                                    {formatCurrency(selectedService.tankOptions[size].price)}
-                                                                </div>
-                                                                <div className="text-xs mt-1">
-                                                                   Est. Duration {selectedService.tankOptions[size].duration} {selectedService.tankOptions[size].duration > 1 ? 'hours' : 'hour'}
-                                                                </div>
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                    <p className="text-xs text-gray-500 mt-2">Select tank size based on your requirements</p>
-                                                </div>
-                                            </div>
-                                        )}
                                         <div className="mt-4">
                                             <label className="block text-sm font-medium text-gray-700">
                                                 Notes (optional)
@@ -485,8 +472,8 @@ const Services = ({ showHomeOnly = false }) => {
                                     </form>
                                 </div>
 
-                                <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex-shrink-0">
-                                    <div className="flex justify-between items-center">
+                                <div className="bg-gray-50 px-4 py-4 border-t border-gray-200 flex-shrink-0">
+                                    <div className="flex justify-between items-center gap-4">
                                         <div className="text-xs text-gray-500">
                                             Step 1 of 2 - Service details
                                         </div>
@@ -494,14 +481,14 @@ const Services = ({ showHomeOnly = false }) => {
                                             <button 
                                                 type="button" 
                                                 onClick={() => setSelectedService(null)} 
-                                                className="px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all duration-200 font-medium cursor-pointer text-sm"
+                                                className="px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all duration-200 font-medium cursor-pointer text-sm"
                                             >
                                                 Cancel
                                             </button>
                                             <button  
                                                 onClick={handleContinueToSummary}
                                                 disabled={submitting} 
-                                                className="px-6 py-2 bg-green-600 text-white rounded-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 font-medium shadow-lg hover:shadow-xl cursor-pointer text-sm"
+                                                className="px-4 py-2 bg-green-600 text-white rounded-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 font-medium shadow-lg hover:shadow-xl cursor-pointer text-sm"
                                             >
                                                 {submitting ? (
                                                     <div className="flex items-center gap-2">
@@ -646,9 +633,9 @@ const Services = ({ showHomeOnly = false }) => {
                                                         Processing...
                                                     </div>
                                                 ) : (
-                                                    <div className="flex items-center gap-2">
-                                                        <CreditCard className="w-4 h-4" />
-                                                        Confirm Booking
+                                                    <div className="">
+                                                        
+                                                        Confirm
                                                     </div>
                                                 )}
                                             </button>

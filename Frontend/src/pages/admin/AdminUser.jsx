@@ -60,33 +60,35 @@ const AdminUser = () => {
     }, [users]);
 
     const handleSearch = () => {
+        const start = startDate ? new Date(startDate).setHours(0,0,0,0) : null;
+        const end = endDate ? new Date(endDate).setHours(23,59,59,999) : null;
+
         const results = users
             .filter(user => user.role === 'customer')
             .filter(c => {
                 const lowerSearch = search.toLowerCase();
                 const userId = `user${c._id.slice(-6)}`;
-                const createdAt = new Date(c.createdAt);
+                const createdAt = new Date(c.createdAt).getTime();
 
-                // Combine address fields for easier search
                 const address = `${c.street || ""} ${c.barangay || ""} ${c.city || ""} ${c.province || ""}`.toLowerCase();
 
                 if (filterType === "name") {
                     return (
                         c.fullname?.toLowerCase().includes(lowerSearch) ||
                         c.email?.toLowerCase().includes(lowerSearch) ||
-                        address.includes(lowerSearch) || // ✅ include address in "name" search
+                        address.includes(lowerSearch) ||
                         userId.includes(lowerSearch)
                     );
                 }
 
                 if (filterType === "date") {
                     return (
-                        (!startDate || createdAt >= startDate) &&
-                        (!endDate || createdAt <= endDate)
+                        (!start || createdAt >= start) &&
+                        (!end || createdAt <= end)
                     );
                 }
 
-                // ✅ For "all", search across everything
+                // For "all"
                 return (
                     (
                         c.fullname?.toLowerCase().includes(lowerSearch) ||
@@ -94,14 +96,13 @@ const AdminUser = () => {
                         address.includes(lowerSearch) ||
                         userId.includes(lowerSearch)
                     ) &&
-                    (!startDate || createdAt >= startDate) &&
-                    (!endDate || createdAt <= endDate)
+                    (!start || createdAt >= start) &&
+                    (!end || createdAt <= end)
                 );
             });
 
         setFilteredUsers(results);
     };
-
 
      useEffect(() => {
         setSearch("");
@@ -109,212 +110,212 @@ const AdminUser = () => {
     }, [filterType, users]);
 
     return (
-        <div className='flex'>
+        <div className='flex h-screen overflow-hidden'>
             <div className='w-full'>
                 <div className="mb-36">
                     <HeaderAdmin />
                 </div>
                 <SidebarAdmin isCollapsed={isCollapsed} toggleCollapse={() => setIsCollapsed(prev => !prev)} />
                 <div className={`flex flex-col transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-72'}`}>
-                    <div className='p-6 flex flex-col'>
-                        <div className='flex justify-center items-center mb-4'>
+                    <div className='p-6 flex flex-col gap-5'>
+                        <div className='flex justify-center items-center'>
                             <span className='text-2xl tracking-tighter font-medium uppercase text-gray-700'>
                                 List of Registered Users
                             </span>
                         </div>
-                        <div className="flex flex-col justify-center md:flex-row gap-2 items-center mb-4">
+                        <div className="flex flex-col justify-center md:flex-row gap-2 items-center">
                             <div className="relative flex items-center gap-2">
                                 <span className="absolute -top-2 left-2 bg-white px-2 text-xs text-gray-600">Search by</span>
-                                <select value={filterType}
-                                    onChange={(e) => {
-                                        setFilterType(e.target.value);
-                                    }}
+
+                                <select
+                                    value={filterType}
+                                    onChange={(e) => setFilterType(e.target.value)}
                                     className="px-3 py-2 border-2 border-gray-400 rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none cursor-pointer">
-                                    <option>All</option>
+                                    <option value="all">All</option>
                                     <option value="name">Name</option>
                                     <option value="date">Date</option>
                                 </select>
                             </div>
-
-                            {filterType === "name" && (
-                                <div className="relative">
-                                <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Search className="w-4 h-4 text-gray-400" />
-                                </span>
-                                <input
-                                    type="text"
-                                    placeholder="Search by name"
-                                    value={search}
-                                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    className="px-8 py-2 border-2 border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 w-sm"
-                                />
-                                </div>
-                            )}
-
-                            {filterType === "date" && (
-                                <div className="relative flex items-center gap-3">
-                                    <div className="relative flex items-center">
-                                        <span className="absolute left-3 text-gray-400 pointer-events-none">
-                                            <Calendar className="w-5 h-5" />
+                            <div className="relative flex items-center gap-2 z-20">
+                                {filterType !== "date" && (
+                                    <div className="relative">
+                                        <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <Search className="w-4 h-4 text-gray-400" />
                                         </span>
-                                        <DatePicker
-                                            selected={startDate}
-                                            onChange={(date) => setStartDate(date)}
-                                            selectsStart
-                                            startDate={startDate}
-                                            endDate={endDate}
-                                            placeholderText="From date"
-                                            className="pl-10 pr-3 py-2 border-2 w-[200px] border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                                            dateFormat="MMMM d, yyyy"
-                                            maxDate={new Date()}
+                                        <input
+                                            type="text"
+                                            placeholder={
+                                                filterType === "name"
+                                                    ? "Search by name"
+                                                    : "Search"
+                                            }
+                                            value={search}
+                                            onChange={(e) => setSearch(e.target.value)}
+                                            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                                            className="px-8 py-2 border-2 border-gray-400 rounded-md w-md focus:outline-none focus:ring-2 focus:ring-green-500"
                                         />
                                     </div>
+                                )}
+                                {filterType === "date" && (
+                                    <div className="flex gap-3">
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                                                <Calendar className="w-5 h-5" />
+                                            </span>
+                                            <DatePicker
+                                                selected={startDate}
+                                                onChange={setStartDate}
+                                                selectsStart
+                                                startDate={startDate}
+                                                endDate={endDate}
+                                                placeholderText="From date"
+                                                className="pl-10 pr-3 py-2 border-2 w-[200px] border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                dateFormat="MMMM d, yyyy"
+                                                maxDate={new Date()}
+                                            />
+                                        </div>
 
-                                    <div className="relative flex items-center">
-                                        <span className="absolute left-3 text-gray-400 pointer-events-none">
-                                            <Calendar className="w-5 h-5" />
-                                        </span>
-                                        <DatePicker
-                                            selected={endDate}
-                                            onChange={(date) => setEndDate(date)}
-                                            selectsEnd
-                                            startDate={startDate}
-                                            endDate={endDate}
-                                            minDate={startDate}
-                                            placeholderText="To date"
-                                            className="pl-10 pr-3 py-2 border-2 w-[200px] border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                                            dateFormat="MMMM d, yyyy"
-                                            maxDate={new Date()}
-                                        />
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                                                <Calendar className="w-5 h-5" />
+                                            </span>
+                                            <DatePicker
+                                                selected={endDate}
+                                                onChange={setEndDate}
+                                                selectsEnd
+                                                startDate={startDate}
+                                                endDate={endDate}
+                                                minDate={startDate}
+                                                placeholderText="To date"
+                                                className="pl-10 pr-3 py-2 border-2 w-[200px] border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                dateFormat="MMMM d, yyyy"
+                                                maxDate={new Date()}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
 
-                            {(filterType === "name" || filterType === "date") && (
-                                <button onClick={handleSearch}
-                                className="px-5 py-2 bg-green-600 text-white rounded-sm cursor-pointer hover:bg-green-700 focus:ring-2 focus:ring-green-400 flex justify-center items-center gap-1 ease-in-out duration-300">
-                                <Search className="w-4 h-4" />
+                                <button
+                                    onClick={handleSearch}
+                                    className="px-5 py-2 bg-green-600 text-white rounded-sm cursor-pointer hover:bg-green-700 focus:ring-2 focus:ring-green-400 flex items-center gap-1 ease-in-out duration-300">
+                                    <Search className="w-4 h-4" />
                                     Search
                                 </button>
-                            )}
+                            </div>
+                        </div>
+              
+                        <div ref={printRef} className="bg-white rounded-sm shadow-sm border border-gray-200 max-h-[500px] overflow-y-auto">
+                            <h1 className="print-title hidden">List of Registered User</h1>
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50 sticky top-0 z-10">
+                                    <tr>
+                                        <th className="px-4 py-6 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">
+                                            USER ID
+                                        </th>
+                                        <th className="px-4 py-6 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Full Name
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">
+                                            Email Address
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">
+                                            Contact number
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">
+                                            Birthdate
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">
+                                            Registered Date
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Address
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className='bg-white divide-y divide-gray-200'>
+                                    {users.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="7" className="text-center py-16">
+                                                <div className="flex flex-col items-center">
+                                                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                                        <UserX className="w-8 h-8 text-gray-400" />                             
+                                                    </div>
+                                                    <h3 className="text-lg font-medium text-gray-900 mb-2">No registered customers yet!</h3>
+                                                    <p className="text-gray-500">Customers will appear here once they register.</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ) : filteredUsers.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="7" className="text-center py-16">
+                                                <div className="flex flex-col items-center">
+                                                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                                        <UserX className="w-8 h-8 text-gray-400" />                             
+                                                    </div>
+                                                    <h3 className="text-lg font-medium text-gray-900 mb-2">No records found!</h3>
+                                                    <p className="text-gray-500">Try adjusting your search keywords.</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        filteredUsers.map((user, idx) => (
+                                            <tr key={user._id} className={`cursor-pointer transition duration-150 ${selectedUser?._id === user._id ? 'bg-green-100' : 'hover:bg-gray-100 ease-in-out duration-300'}`}        
+                                                onDoubleClick={() => {                         
+                                                    setSelectedUser(user);
+                                                    setIsModalOpen(true);
+                                                }}>
+                                                <td className="px-4 py-4 text-sm text-gray-800">
+                                                    {idx + 1}
+                                                </td>
+                                                <td className="px-4 py-6 text-sm text-gray-900">       
+                                                    {user.fullname}
+                                                </td>
+                                                <td className="px-4 py-4 text-sm text-gray-900">
+                                                    {user.email}
+                                                </td>
+                                                <td className="px-4 py-4 text-sm capitalize">
+                                                    {user.phone}
+                                                </td>
+                                                <td className="px-4 py-4 text-sm capitalize whitespace-nowrap">
+                                                    {shortFormatDate(user.birthdate)}
+                                                </td>
+                                                <td className="px-4 py-4 text-sm text-gray-900 capitalize">
+                                                    {shortFormatDate(user.createdAt)}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-gray-900">    
+                                                    {user.street} {user.barangay}, {user.city}      
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                            <div className="p-6 mt-10 print:block hidden">
+                                {admin && (
+                                    <div>
+                                        <p className="text-sm text-gray-700">Prepared by: {admin.fullname}</p>
+                                        <span>Administrator</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <div className="flex justify-end">
+                            <div className="flex flex-wrap items-center gap-2">
+                                <button
+                                    onClick={() => handlePrint(printRef, {
+                                        title: 'List of Registered Users',
+                                        customDate: new Date().toLocaleDateString('en-US', { 
+                                            year: 'numeric', month: 'long', day: 'numeric' 
+                                        })
+                                    })}
+                                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-sm cursor-pointer hover:bg-hray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 shadow-sm hover:shadow-md"
+                                >
+                                    <Printer className="w-4 h-4" />
+                                    <span>Print</span>
+                                </button>
+                            </div>
                         </div>
                         
-                        <div className="overflow-y-auto h-[calc(100vh)]">
-                            <div ref={printRef} className="bg-white rounded-sm shadow-sm border border-gray-200">
-                            
-
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="px-4 py-6 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">
-                                                USER ID
-                                            </th>
-                                            <th className="px-6 py-6 text-left text-xs font-medium text-gray-500 uppercase">
-                                                Full Name
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">
-                                                Email Address
-                                            </th>
-                                            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">
-                                                Contact number
-                                            </th>
-                                            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">
-                                                Birthdate
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">
-                                                Registered Date
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                                Address
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className='bg-white divide-y divide-gray-200'>
-                                        {users.length === 0 ? (
-                                            <tr>
-                                                <td colSpan="7" className="text-center py-16">
-                                                    <div className="flex flex-col items-center">
-                                                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                                                            <UserX className="w-8 h-8 text-gray-400" />                             
-                                                        </div>
-                                                        <h3 className="text-lg font-medium text-gray-900 mb-2">No registered customers yet!</h3>
-                                                        <p className="text-gray-500">Customers will appear here once they register.</p>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ) : filteredUsers.length === 0 ? (
-                                            <tr>
-                                                <td colSpan="7" className="text-center py-16">
-                                                    <div className="flex flex-col items-center">
-                                                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                                                            <UserX className="w-8 h-8 text-gray-400" />                             
-                                                        </div>
-                                                        <h3 className="text-lg font-medium text-gray-900 mb-2">No records found!</h3>
-                                                        <p className="text-gray-500">Try adjusting your search keywords.</p>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            filteredUsers.map((user, idx) => (
-                                                <tr key={user._id} className={`cursor-pointer transition duration-150 ${selectedUser?._id === user._id ? 'bg-green-100' : 'hover:bg-gray-100 ease-in-out duration-300'}`}
-                                                    onClick={() => setSelectedUser(user)}           
-                                                    onDoubleClick={() => {                         
-                                                        setSelectedUser(user);
-                                                        setIsModalOpen(true);
-                                                    }}>
-                                                    <td className="px-4 py-4 text-sm text-gray-800">
-                                                        {idx + 1}
-                                                    </td>
-                                                    <td className="px-6 py-6 text-sm text-gray-900 whitespace-nowrap">       
-                                                        {user.fullname}
-                                                    </td>
-                                                    <td className="px-6 py-4 text-sm text-gray-900">
-                                                        {user.email}
-                                                    </td>
-                                                    <td className="px-3 py-4 text-sm capitalize">
-                                                        {user.phone}
-                                                    </td>
-                                                    <td className="px-3 py-4 text-sm capitalize whitespace-nowrap">
-                                                        {shortFormatDate(user.birthdate)}
-                                                    </td>
-                                                    <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900 capitalize">
-                                                        {shortFormatDate(user.createdAt)}
-                                                    </td>
-                                                    <td className="px-6 py-4 text-sm text-gray-900">    
-                                                        {user.street} {user.barangay}, {user.city}      
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
-                                <div className="p-6 mt-10 print:block hidden">
-                                    {admin && (
-                                        <div>
-                                            <p className="text-sm text-gray-700">Prepared by: {admin.fullname}</p>
-                                            <span>Administrator</span>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                             <div className="flex justify-end py-4 bg-white border-t border-gray-200">
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <button
-                                        onClick={() => handlePrint(printRef, {
-                                            title: 'List of Registered Users',
-                                            customDate: new Date().toLocaleDateString('en-US', { 
-                                                year: 'numeric', month: 'long', day: 'numeric' 
-                                            })
-                                        })}
-                                        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-sm cursor-pointer hover:bg-hray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 shadow-sm hover:shadow-md"
-                                    >
-                                        <Printer className="w-4 h-4" />
-                                        <span>Print</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div> 
                     </div>
 
                     {isModalOpen && selectedUser && (
@@ -353,8 +354,8 @@ const AdminUser = () => {
                                         </div>
                                         
                                         <div className="grid grid-cols-3 gap-x-4 py-3 border-b border-gray-100">
-                                            <span className="text-sm font-medium text-gray-500">Gender</span>
-                                            <span className="col-span-2 text-sm text-gray-900">Male</span>
+                                            <span className="text-sm font-medium text-gray-500">Sex</span>
+                                            <span className="col-span-2 text-sm text-gray-900 capitalize">{selectedUser.gender || 'Male'}</span>
                                         </div>
 
                                         <div className="grid grid-cols-3 gap-x-4 py-3">

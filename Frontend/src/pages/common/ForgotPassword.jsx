@@ -13,6 +13,8 @@ import {
     KeyRound,
     BadgeCheck
 } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
+
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
@@ -21,11 +23,19 @@ const ForgotPassword = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [step, setStep] = useState('email');
     const [isLoading, setIsLoading] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const navigate = useNavigate();
 
     const handleForgotPassword = async (e) => {
         e.preventDefault();
-            setIsLoading(true);
+
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email.trim())) {
+            toast.error("Please enter a valid email address");
+            return;
+        }
+        setIsLoading(true);
         try{
             const response = await axios.post('/auth/forgot-password', { email });
             toast.success(response.data.message);
@@ -69,8 +79,8 @@ const ForgotPassword = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
-            <div className="max-w-md w-full bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border border-white/20">
+        <div className="min-h-screen flex items-center justify-center">
+            <div className="max-w-md w-full bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-white/20">
                 {step === 'email' && (
                     <div>
                         <div className="text-center mb-8">
@@ -78,7 +88,7 @@ const ForgotPassword = () => {
                                 <MailCheck className="w-8 h-8 text-white" />
                             </div>
                             <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-                                Forgot Password
+                                Forgot Password?
                             </h2>
                             <p className="text-gray-500 mt-2">Enter your email to receive a reset link</p>
                             </div>
@@ -90,7 +100,6 @@ const ForgotPassword = () => {
                                     value={email}
                                     placeholder="Enter your email"
                                     onChange={(e) => setEmail(e.target.value)}
-                                    required
                                     className="w-full px-6 py-4 text-sm border-2 border-gray-200 rounded-xl focus:green-orange-500 focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-300 bg-white/80 hover:bg-white "
                                 />
                                 <div className="absolute inset-y-0 right-0 flex items-center pr-4">
@@ -147,30 +156,44 @@ const ForgotPassword = () => {
                                 </div>
                                 <div className="relative">
                                     <input
-                                        type="password"
+                                        type={showNewPassword ? "text" : "password"}
                                         value={newPassword}
                                         placeholder="Enter new password"
                                         onChange={(e) => setNewPassword(e.target.value)}
                                         required
-                                        className="w-full px-6 py-4 text-sm border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 focus:outline-none transition-all duration-300 bg-white/80 hover:bg-white backdrop-blur-sm"
+                                        className="w-full px-6 py-4 text-sm border-2 border-gray-200 rounded-xl 
+                                                focus:border-green-500 focus:ring-2 focus:ring-green-200 
+                                                bg-white/80 hover:bg-white transition-all duration-300"
                                     />
-                                    <div className="absolute inset-y-0 right-0 flex items-center pr-4">
-                                        <LockKeyhole className="w-5 h-5 text-gray-400" />
-                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowNewPassword(!showNewPassword)}
+                                        className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-600"
+                                    >
+                                        {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                    </button>
                                 </div>
+
                                 <div className="relative">
                                     <input
-                                        type="password"
+                                        type={showConfirmPassword ? "text" : "password"}
                                         value={confirmPassword}
                                         placeholder="Confirm new password"
                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                         required
-                                        className="w-full px-6 py-4 text-sm border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 focus:outline-none transition-all duration-300 bg-white/80 hover:bg-white backdrop-blur-sm"
+                                        className="w-full px-6 py-4 text-sm border-2 border-gray-200 rounded-xl 
+                                                focus:border-green-500 focus:ring-2 focus:ring-green-200 
+                                                bg-white/80 hover:bg-white transition-all duration-300"
                                     />
-                                    <div className="absolute inset-y-0 right-0 flex items-center pr-4">
-                                        <Lock className="w-5 h-5 text-gray-400" />
-                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-600"
+                                    >
+                                        {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                    </button>
                                 </div>
+
                                 <GradientButton type="submit">
                                     <span className="flex items-center justify-center space-x-2">
                                     <span>Reset Password</span>

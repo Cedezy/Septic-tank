@@ -6,7 +6,8 @@ import {
   UserCog,
   LogOut,
   Menu,
-  X
+  X,
+  Wrench
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from '../lib/axios';
@@ -20,7 +21,8 @@ const SidebarTech = ({ children }) => {
     const navigate = useNavigate();
 
     const menuItems = [
-        { id: 'schedule', label: 'My Schedule', icon: Users, path: '/technician/schedule' },
+        { id: 'services', label: 'Services', icon: Wrench, path: '/technician/services' },
+        { id: 'schedule', label: 'My Bookings', icon: Users, path: '/technician/schedule' },
         { id: 'about', label: 'About Us', icon: Info, path: '/technician/about' },
         { id: 'contact', label: 'Contact Us', icon: Phone, path: '/technician/contact' },
         { id: 'profile', label: 'My Account', icon: UserCog, path: '/technician/account' },

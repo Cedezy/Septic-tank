@@ -124,7 +124,7 @@ const AdminServices = () => {
     };
 
     return (
-         <div className="min-h-screen flex">
+         <div className="h-screen flex overflow-hidden">
             <div className='w-full'>
                 <div className="mb-36">
                     <HeaderAdmin />
@@ -150,7 +150,7 @@ const AdminServices = () => {
                                 ADD NEW SERVICE
                             </button>
                         </div>
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                       <div className="bg-white rounded-lg shadow-sm border border-gray-200 max-h-[560px] overflow-y-auto">
                             {services.length === 0 ? (
                                 <div className="text-center py-20">
                                     <div className="flex flex-col items-center">
@@ -175,76 +175,120 @@ const AdminServices = () => {
                                                     : 'border-gray-200 hover:border-gray-300'
                                             }`}
                                         >
-                                            {selectedService?._id === service._id && (
-                                                <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-md">
-                                                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                                                    </svg>
+
+                                            {/* ---- IMAGE CAROUSEL ---- */}
+                                            {service.images && service.images.length > 0 && (
+                                                <div 
+                                                    className="relative w-full overflow-hidden rounded-t-xl h-48"
+                                                    onClick={(e) => e.stopPropagation()}   // ← Prevents card click
+                                                >
+                                                    <div className="relative h-full w-full">
+                                                        <div
+                                                            className="flex transition-transform duration-300 ease-out"
+                                                            style={{ transform: `translateX(-${service.carouselIndex || 0}00%)` }}
+                                                        >
+                                                            {service.images.map((img, idx) => (
+                                                                <img
+                                                                    key={idx}
+                                                                    src={`${BASE_URL}${img}`}
+                                                                    className="w-full h-48 object-cover flex-shrink-0"
+                                                                />
+                                                            ))}
+                                                        </div>
+
+                                                        {/* Prev */}
+                                                        {service.images.length > 1 && (
+                                                            <button
+                                                                className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 p-2 rounded-full shadow hover:bg-white"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setServices(prev =>
+                                                                        prev.map(s =>
+                                                                            s._id === service._id
+                                                                                ? {
+                                                                                    ...s,
+                                                                                    carouselIndex:
+                                                                                        ((service.carouselIndex || 0) - 1 + service.images.length) %
+                                                                                        service.images.length
+                                                                                }
+                                                                                : s
+                                                                        )
+                                                                    );
+                                                                }}
+                                                            >
+                                                                ‹
+                                                            </button>
+                                                        )}
+
+                                                        {/* Next */}
+                                                        {service.images.length > 1 && (
+                                                            <button
+                                                                className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 p-2 rounded-full shadow hover:bg-white"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setServices(prev =>
+                                                                        prev.map(s =>
+                                                                            s._id === service._id
+                                                                                ? {
+                                                                                    ...s,
+                                                                                    carouselIndex:
+                                                                                        ((service.carouselIndex || 0) + 1) % service.images.length
+                                                                                }
+                                                                                : s
+                                                                        )
+                                                                    );
+                                                                }}
+                                                            >
+                                                                ›
+                                                            </button>
+                                                        )}
+
+                                                        {/* Dots */}
+                                                        <div className="absolute bottom-2 w-full flex justify-center gap-1"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            {service.images.map((_, idx) => (
+                                                                <div
+                                                                    key={idx}
+                                                                    className={`w-2 h-2 rounded-full ${
+                                                                        (service.carouselIndex || 0) === idx ? 'bg-white' : 'bg-white/50'
+                                                                    }`}
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             )}
-                                            
+
+                                            {/* ---- CARD CONTENT ---- */}
                                             <div className="p-6">
                                                 <div className="flex items-start justify-between mb-4">
                                                     <h3 className="text-lg font-semibold text-gray-900 leading-tight flex-1 pr-2">
                                                         {service.name}
                                                     </h3>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setImageService(service);
-                                                            setShowImageModal(true);
-                                                        }}
-                                                        className="flex-shrink-0 p-2.5 bg-gray-50 rounded-full text-gray-500 hover:text-green-600 hover:bg-green-50 transition-all duration-200 shadow-sm group-hover:shadow-md cursor-pointer"
-                                                        title="View Images"
-                                                    >
-                                                        <Eye className="h-5 w-5" />
-                                                    </button>
                                                 </div>
+
                                                 <div className="mb-6">
                                                     <p className="text-sm text-gray-600 leading-relaxed line-clamp-3" title={service.description}>
                                                         {service.description}
                                                     </p>
                                                 </div>
+
                                                 <div className="space-y-4">
-                                                    {service.hasTankSize ? (
-                                                        <div className="grid grid-cols-2 gap-2">
-                                                            {Object.entries(service.tankOptions || {}).map(([size, info]) => (
-                                                                <div key={size} className="bg-gray-50 rounded-lg p-2 border border-gray-100">
-                                                                    <div className="flex items-center justify-between mb-2">
-                                                                        <span className="text-sm font-medium text-gray-700 capitalize">
-                                                                            {size} Tank
-                                                                        </span>
-                                                                    </div>
-                                                                    <div className="flex items-center text-sm text-gray-500">
-                                                                        <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                                        </svg>
-                                                                        {info.duration} {info.duration > 1 ? 'hours' : 'hour'}
-                                                                    </div>
-                                                                    <div>
-                                                                        <span className="text-lg font-bold text-gray-900">
-                                                                            {formatCurrency(info.price || 0)}
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                            ))}
+                                                    <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4 border border-green-100">
+                                                        <div className="flex items-center justify-between mb-2">
+                                                            <span className="text-sm font-medium text-gray-700">Fixed Price</span>
+                                                            <span className="text-2xl font-bold text-gray-900">
+                                                                {formatCurrency(service.fixedPrice)}
+                                                            </span>
                                                         </div>
-                                                    ) : (
-                                                        <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4 border border-green-100">
-                                                            <div className="flex items-center justify-between mb-2">
-                                                                <span className="text-sm font-medium text-gray-700">Fixed Price</span>
-                                                                <span className="text-2xl font-bold text-gray-900">
-                                                                    {formatCurrency(service.fixedPrice)}
-                                                                </span>
-                                                            </div>
-                                                            <div className="flex items-center text-sm text-gray-600">
-                                                                <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                                </svg>
-                                                                {service.fixedDuration} {service.fixedDuration > 1 ? 'hours' : 'hour'}
-                                                            </div>
+                                                        <div className="flex items-center text-sm text-gray-600">
+                                                            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                            </svg>
+                                                            {service.fixedDuration} {service.fixedDuration > 1 ? 'hours' : 'hour'}
                                                         </div>
-                                                    )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -252,6 +296,7 @@ const AdminServices = () => {
                                 </div>
                             )}
                         </div>
+
                     </div>
                     
                     {showForm && (
@@ -319,13 +364,12 @@ const AdminServices = () => {
                                                         <span className="text-red-500 ml-1">*</span>
                                                     </label>
                                                     <div className="relative">
-                                                        <Building2 className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
                                                         <input
                                                             type="text"
                                                             placeholder="Enter service name"
                                                             value={formData.name}
                                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                                            className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-md focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 placeholder-gray-400 text-gray-800 text-sm"
+                                                            className="w-full pl-4 pr-4 py-3 border-2 border-gray-200 rounded-md focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 placeholder-gray-400 text-gray-800 text-sm"
                                                             required
                                                         />
                                                     </div>
@@ -345,12 +389,11 @@ const AdminServices = () => {
                                                     <span className="text-red-500 ml-1">*</span>
                                                 </label>
                                                 <div className="relative">
-                                                    <FileText className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
                                                     <textarea
-                                                        placeholder="Describe your service in detail..."
+                                                        placeholder="Describe your service in detail"
                                                         value={formData.description}
                                                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-md focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 placeholder-gray-400 text-gray-800 resize-none text-sm"
+                                                        className="w-full pl-4 pr-4 py-3 border-2 border-gray-200 rounded-md focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 placeholder-gray-400 text-gray-800 resize-none text-sm"
                                                         rows={4}
                                                         required
                                                     />
@@ -361,154 +404,42 @@ const AdminServices = () => {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="mb-6">
-                                            <label className="flex items-center space-x-2">
+                                        
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                                                    Service Price
+                                                </label>
                                                 <input
-                                                    type="checkbox"
-                                                    checked={formData.hasTankSize}
-                                                    onChange={(e) =>
-                                                        setFormData({ ...formData, hasTankSize: e.target.checked })
-                                                    }
-                                                    className='cursor-pointer'
+                                                    type="number"
+                                                    step="0.01"
+                                                    min="0"
+                                                    placeholder="0.00"
+                                                    value={formData.fixedPrice || ""}
+                                                    onChange={(e) => setFormData({ ...formData, fixedPrice: e.target.value })}
+                                                    className="w-full border-2 border-gray-200 rounded-md px-3 py-2 text-sm"
                                                 />
-                                                <span className="text-sm font-semibold text-gray-700 cursor-pointer">
-                                                This service has tank sizes
-                                                </span>
-                                            </label>
-                                        </div>
-                                        {formData.hasTankSize ? (
-                                            <div className="space-y-4">
-                                                 {["small", "medium", "large", "xl"].map((size) => (
-                                                    <div key={size} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                                        <div>
-                                                            <label className="block text-sm font-semibold text-gray-700 mb-1 capitalize">
-                                                                {size} Tank Price
-                                                            </label>
-                                                            <div className="relative">
-                                                                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
-                                                                    ₱
-                                                                </span>
-                                                                <input
-                                                                    type="number"
-                                                                    min="0"
-                                                                    step="0.01"
-                                                                    placeholder="0.00"
-                                                                    value={formData.tankOptions?.[size]?.price || ""}
-                                                                    onChange={(e) =>
-                                                                    setFormData({
-                                                                        ...formData,
-                                                                        tankOptions: {
-                                                                            ...formData.tankOptions,
-                                                                            [size]: {
-                                                                            ...formData.tankOptions?.[size],
-                                                                            price: e.target.value,
-                                                                            },
-                                                                        },
-                                                                    })
-                                                                }
-                                                                className="w-full border-2 text-sm border-gray-200 rounded-md pl-8 pr-3 py-2"
-                                                                />
-                                                            </div>
-                                                        </div>
-
-                                                        <div>
-                                                            <label className="block text-sm font-semibold text-gray-700 mb-1 capitalize">
-                                                                Capacity (liters)
-                                                            </label>
-                                                            <div className="relative">
-                                                                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
-                                                                    <Droplet className="w-4 h-4" />
-                                                                </span>
-                                                                <input
-                                                                    type="number"
-                                                                    min="0"
-                                                                    placeholder="Enter liters"
-                                                                    value={formData.tankOptions?.[size]?.capacity || ""}
-                                                                    onChange={(e) =>
-                                                                        setFormData({
-                                                                        ...formData,
-                                                                        tankOptions: {
-                                                                            ...formData.tankOptions,
-                                                                            [size]: {
-                                                                            ...formData.tankOptions?.[size],
-                                                                            capacity: e.target.value,
-                                                                            },
-                                                                        },
-                                                                    })
-                                                                }
-                                                                className="w-full border-2 text-sm border-gray-200 rounded-md pl-8 pr-3 py-2"
-                                                                />
-                                                            </div>
-                                                        </div>
-
-                                                        <div>
-                                                            <label className="block text-sm font-semibold text-gray-700 mb-1 capitalize">
-                                                                Duration (hours)
-                                                            </label>
-                                                            <div className="relative">
-                                                                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
-                                                                    <Timer className="w-4 h-4" />
-                                                                </span>
-                                                                <input
-                                                                    type="number"
-                                                                    min="0"
-                                                                    placeholder="Enter duration"
-                                                                    value={formData.tankOptions?.[size]?.duration || ""}
-                                                                    onChange={(e) =>
-                                                                        setFormData({
-                                                                        ...formData,
-                                                                        tankOptions: {
-                                                                            ...formData.tankOptions,
-                                                                            [size]: {
-                                                                            ...formData.tankOptions?.[size],
-                                                                            duration: e.target.value,
-                                                                            },
-                                                                        },
-                                                                    })
-                                                                }
-                                                                className="w-full border-2 text-sm border-gray-200 rounded-md pl-8 pr-3 py-2"
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ))}
                                             </div>
-                                        ) : (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div>
-                                                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                                                        Service Price
-                                                    </label>
+                                            <div>
+                                                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                                                    Service Duration (hours)
+                                                </label>
+                                                <div className='relative'>
+                                                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+                                                    <Timer className="w-4 h-4" />
+                                                    </span>
                                                     <input
                                                         type="number"
-                                                        step="0.01"
                                                         min="0"
-                                                        placeholder="0.00"
-                                                        value={formData.fixedPrice || ""}
-                                                        onChange={(e) => setFormData({ ...formData, fixedPrice: e.target.value })}
-                                                        className="w-full border-2 border-gray-200 rounded-md px-3 py-2 text-sm"
+                                                        placeholder="Enter duration"
+                                                        value={formData.fixedDuration || ""}
+                                                        onChange={(e) => setFormData({ ...formData, fixedDuration: e.target.value })}
+                                                        className="w-full border-2 pl-8 border-gray-200 rounded-md text-sm px-3 py-2"
                                                     />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                                                        Service Duration (hours)
-                                                    </label>
-                                                    <div className='relative'>
-                                                        <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
-                                                        <Timer className="w-4 h-4" />
-                                                        </span>
-                                                        <input
-                                                            type="number"
-                                                            min="0"
-                                                            placeholder="Enter duration"
-                                                            value={formData.fixedDuration || ""}
-                                                            onChange={(e) => setFormData({ ...formData, fixedDuration: e.target.value })}
-                                                            className="w-full border-2 pl-8 border-gray-200 rounded-md text-sm px-3 py-2"
-                                                        />
-                                                    </div>     
-                                                </div>
+                                                </div>     
                                             </div>
-                                        )}
+                                        </div>
+                                     
                                         <div className='flex'>
                                             <div>
                                                 <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
@@ -517,13 +448,13 @@ const AdminServices = () => {
                                                     {!editingId && <span className="text-red-500 ml-1">*</span>}
                                                 </label>
                                                 <div className="relative">
-                                                    <Image className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
+                                                   
                                                     <input
                                                         type="file"
                                                         accept="image/*"
                                                         multiple
                                                         onChange={(e) => setFormData({ ...formData, images: Array.from(e.target.files) })}
-                                                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                                                        className="w-full pl-2 pr-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
                                                         required={!editingId}
                                                     />
                                                 </div>

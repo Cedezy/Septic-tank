@@ -5,11 +5,13 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import { Link } from 'react-router-dom';
 import Loading from '../../components/Loading';
+import { useNavigate } from 'react-router-dom';
 
 const FAQs = () => {
     const [faqs, setFaqs] = useState([]);
     const [activeIndex, setActiveIndex] = useState(null);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate()
 
     useEffect(() => {
         const fetchFaqs = async () => {
@@ -47,7 +49,15 @@ const FAQs = () => {
         <div className='min-h-screen bg-gray-50'>
             <Header/>
             <div className='pt-28'>
-                 <div className="max-w-7xl mx-auto">
+                 <div className="max-w-7xl mx-auto space-y-4">
+                    <button 
+                        type="button"
+                        onClick={() => navigate(-1)}
+                        className="text-gray-600 hover:text-gray-800 flex items-center gap-1 ml-6"
+                        >
+                        <span className="text-xl">←</span>
+                        <span className="text-md font-medium">Back</span>
+                    </button>
                     <div className="text-center mb-16 max-w-4xl mx-auto px-4">
                         <h2 className="text-4xl md:text-5xl text-gray-800 uppercase tracking-tight mb-4">
                             frequently asked questions
@@ -128,7 +138,6 @@ const FAQs = () => {
                     </div>
                 </div>
             </div>
-            <Footer/>
         </div>
     );
 };

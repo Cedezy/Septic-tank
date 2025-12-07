@@ -18,6 +18,7 @@ import AdminCustomer from './pages/admin/AdminCustomer';
 import AdminUser from './pages/admin/AdminUser';
 import AdminBooking from './pages/admin/AdminBooking';
 import AdminSchedule from './pages/admin/AdminSchedule';
+import AdminServices1 from './pages/admin/AdminServices1'
 import AdminServices from './pages/admin/AdminServices';
 import AdminMessage from './pages/admin/AdminMessage';
 import AdminAbout from './pages/admin/AdminAbout';
@@ -31,18 +32,24 @@ import AdminTech from './pages/admin/AdminTech';
 import CustomerDashboard from './pages/customer/CustomerDashboard';
 import CustomerBooking from './pages/customer/CustomerBooking';
 import MangagerDashboard from './pages/manager/ManagerDashboard';
+import ManagerUser from './pages/manager/ManagerUser';
 import ManagerCustomer from './pages/manager/ManagerCustomer';
 import ManagerSchedule from './pages/manager/ManagerSchedule';
 import ManagerBooking from './pages/manager/ManagerBooking';
+import ManagerServices1 from './pages/manager/ManagerServices1';
+import ManagerServices from './pages/manager/ManagerServices';
 import ManagerAbout from './pages/manager/ManagerAbout';
 import ManagerContact from './pages/manager/ManagerContact';
+import ManagerFAQs from './pages/manager/ManagerFAQs';
 import ManagerAccount from './pages/manager/ManagerAccount';
+import ManagerGallery from './pages/manager/ManagerGallery';
 import TechDashboard from './pages/technician/TechDashboard';
 import TechSchedule from './pages/technician/TechSchedule';
 import TechAbout from './pages/technician/TechAbout';
 import TechContact from './pages/technician/TechContact';
 import TechAccount from './pages/technician/TechAccount';
 import AdminGallery from './pages/admin/AdminGallery';
+import TechServices from './pages/technician/TechServices';
 
 const App = () => {
   return (
@@ -66,6 +73,7 @@ const App = () => {
           <Route path="customers" element={<AdminCustomer />} />
           <Route path="users" element={<AdminUser />} />
           <Route path="bookings" element={<AdminBooking />} />
+          <Route path="services1" element={<AdminServices1 />} />
           <Route path="services" element={<AdminServices />} />
           <Route path="schedule" element={<AdminSchedule />} />
           <Route path="messages" element={<AdminMessage />} />
@@ -85,12 +93,17 @@ const App = () => {
         </Route>
         <Route path="/manager">
           <Route path="dashboard" element={<MangagerDashboard />} />
+          <Route path="users" element={<ManagerUser />} />
           <Route path="customers" element={<ManagerCustomer />} />
           <Route path="bookings" element={<ManagerBooking />} />
+          <Route path="services1" element={<ManagerServices1 />} />
+          <Route path="services" element={<ManagerServices />} />
           <Route path="schedule" element={<ManagerSchedule />} />
           <Route path="about" element={<ManagerAbout />} />
           <Route path="contact" element={<ManagerContact />} />
+          <Route path="faqs" element={<ManagerFAQs />} />
           <Route path="account" element={<ManagerAccount />} />
+          <Route path="gallery" element={<ManagerGallery />} />
         </Route>
         <Route path="/technician">
           <Route path="dashboard" element={<TechDashboard />} />
@@ -98,6 +111,7 @@ const App = () => {
           <Route path="about" element={<TechAbout />} />
           <Route path="contact" element={<TechContact />} />
           <Route path="account" element={<TechAccount />} />
+          <Route path="services" element={<TechServices />} />
         </Route>
       </Routes>
       <Toast/>

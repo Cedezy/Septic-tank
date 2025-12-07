@@ -8,7 +8,6 @@ const ReviewsPage = () => {
         <div>
             <Header/>
             <Reviews/>
-            <Footer/>
         </div>
     )
 }

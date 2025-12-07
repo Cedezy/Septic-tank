@@ -9,7 +9,6 @@ const Contact = () => {
         <div className='min-h-screen bg-gray-50'>
             <Header />
             <ContactUs/>
-            <Footer/>
        </div>
     );
 };

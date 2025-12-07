@@ -1,6 +1,7 @@
 const Booking = require('../models/Booking');
 const TechnicianStatus = require('../models/TechnicianStatus')
 const ServiceType = require('../models/ServiceType')
+const User = require('../models/User');
 
 exports.createBooking = async (req, res) => {
     try {
@@ -53,22 +54,29 @@ exports.createBooking = async (req, res) => {
 };
 
 exports.getBookingsByCustomer = async (req, res) => {
-    try{
+    try {
         const customerId = req.user._id;
-        const bookings = await Booking.find({ customerId })
+        let bookings = await Booking.find({ customerId })
             .populate('technicianId')
             .populate('serviceType')
             .populate('customerId');
 
-        if(!bookings){
+        if (!bookings || bookings.length === 0) {
             return res.status(404).json({ message: 'No bookings found for this customer.', success: false });
         }
+
+        // Custom sort: pending first, then confirmed, completed, cancelled, declined
+        const statusOrder = ['pending', 'confirmed', 'completed', 'cancelled', 'declined'];
+        bookings.sort((a, b) => statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status));
+
         res.status(200).json({ message: 'Customer bookings fetched successfully.', success: true, bookings });
     } 
-    catch(err){
+    catch (err) {
+        console.error(err);
         res.status(500).json({ message: 'Failed to fetch customer bookings.', success: false });
     }
 };
+
 
 exports.getAllBookings = async (req, res) => {
     try{
@@ -144,38 +152,94 @@ exports.updateBookingStatus = async (req, res) => {
 exports.assignTechnician = async (req, res) => {
     try {
         const { technicianId } = req.body;
+        const bookingId = req.params.bookingId;
 
-        const booking = await Booking.findByIdAndUpdate(
-            req.params.bookingId,
-            { technicianId },
-            { new: true }
-        ).populate('technicianId', 'fullname email');
-
-        if(!booking){
+        const booking = await Booking.findById(bookingId);
+        if (!booking) {
             return res.status(404).json({ message: 'Booking not found', success: false });
         }
-        res.status(200).json({ message: `${booking.technicianId.fullname} has been assigned successfully.`, booking });
-    } 
-    catch(err){
+
+        // Check if technician has another booking at the same date and time
+        const conflictingBooking = await Booking.findOne({
+            technicianId,
+            date: booking.date,
+            status: { $in: ['pending', 'confirmed'] } // Only count active bookings
+        });
+
+        if (conflictingBooking) {
+            return res.status(400).json({
+                success: false,
+                message: `Technician is busy at ${booking.date} ${booking.time}.`
+            });
+        }
+
+        // Assign technician
+        booking.technicianId = technicianId;
+        await booking.save();
+
+        // Populate technician fullname
+        await booking.populate('technicianId', 'fullname');
+
+        res.status(200).json({
+            message: `${booking.technicianId.fullname} assigned successfully.`,
+            booking
+        });
+    } catch (err) {
+        console.error(err);
         res.status(500).json({ message: 'Failed to assign technician', success: false });
     }
 };
 
+
+
+
 exports.getAssignedTechnician = async (req, res) => {
-    try{
+    try {
         const technicianId = req.user._id;
 
         const bookings = await Booking.find({ technicianId })
             .populate('customerId')
-            .populate('serviceType');
+            .populate('serviceType')
+             .populate('technicianId');
 
-        if(!bookings){
-            return res.status(200).json({ success: true, message: 'No assigned bookings yet.' });
+        if (!bookings || bookings.length === 0) {
+            return res.status(200).json({
+                success: true,
+                message: 'No assigned bookings yet.'
+            });
         }
-        res.status(200).json({ success: true, message: 'Assigned bookings retrieved successfully.', bookings });
-    } 
-    catch(err){
-        res.status(500).json({ success: false, message: 'Failed to fetch assigned bookings.' });
+
+        // Status sorting order
+        const order = { 
+            pending: 1, 
+            confirmed: 2, 
+            completed: 3, 
+            cancelled: 4,
+            declined: 5
+        };
+
+        const sortedBookings = bookings.sort((a, b) => {
+            const statusOrder = (order[a.status] || 99) - (order[b.status] || 99);
+
+            if (statusOrder !== 0) return statusOrder;
+
+            // Sort by date if status is the same
+            const dateA = new Date(a.date);
+            const dateB = new Date(b.date);
+            return dateA - dateB;
+        });
+
+        res.status(200).json({
+            success: true,
+            message: 'Assigned bookings retrieved successfully.',
+            bookings: sortedBookings
+        });
+
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch assigned bookings.'
+        });
     }
 };
 
@@ -263,6 +327,74 @@ exports.updateBookingStatusByTechnician = async (req, res) => {
     }
 };
 
+exports.updateServiceTypeByTechnician = async (req, res) => {
+    try {
+        const { bookingId } = req.params;
+        const { serviceType, tankSize } = req.body;
+        const technicianId = req.user._id;
+
+        const booking = await Booking.findById(bookingId).populate('serviceType');
+        if (!booking) {
+            return res.status(404).json({ success: false, message: 'Booking not found.' });
+        }
+
+        if (!booking.technicianId || booking.technicianId.toString() !== technicianId.toString()) {
+            return res.status(403).json({ success: false, message: 'Unauthorized: Not assigned technician.' });
+        }
+
+        const service = await ServiceType.findById(serviceType);
+        if (!service) {
+            return res.status(404).json({ success: false, message: 'Please select service type.' });
+        }
+
+        let price, duration, capacity;
+        if (service.hasTankSize) {
+            if (!tankSize || !service.tankOptions[tankSize]) {
+                return res.status(400).json({ success: false, message: 'Invalid or missing tank size for this service.' });
+            }
+            price = service.tankOptions[tankSize].price;
+            duration = service.tankOptions[tankSize].duration;
+            capacity = service.tankOptions[tankSize].capacity;
+        } else {
+            price = service.fixedPrice;
+            duration = service.fixedDuration;
+            capacity = null;
+        }
+
+        // Log previous service
+        const oldServiceName = booking.serviceType?.name || 'Unknown Service';
+        const newServiceName = service.name;
+
+        if (oldServiceName !== newServiceName) {
+            booking.serviceChangeLogs.push({
+                from: oldServiceName,
+                to: newServiceName,
+                changedAt: new Date()
+            });
+        }
+
+        // Update booking
+        booking.serviceType = serviceType;
+        booking.tankSize = service.hasTankSize ? tankSize : null;
+        booking.price = price;
+        booking.duration = duration;
+        booking.capacity = capacity;
+
+        await booking.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Service type change successfully.',
+            booking
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Failed to update service type.' });
+    }
+};
+
+
 exports.getAvailableTimeSlots = async (req, res) => {
     try{
         const { date } = req.query;
@@ -314,28 +446,54 @@ exports.cancelBookingByCustomer = async (req, res) => {
         }
 
         if (booking.status === 'cancelled' || booking.status === 'completed') {
-            return res.status(400).json({ success: false, message: 'Booking cannot be cancelled.' });
+            return res.status(400).json({
+                success: false,
+                message: 'Booking cannot be cancelled.'
+            });
         }
 
+        // Get customer
+        const customer = await User.findById(booking.customerId);
+
+       
+
+        // Check BEFORE cancel
+        const MAX_CANCELLATIONS = 3;
+        if (customer.cancellationCount >= MAX_CANCELLATIONS) {
+            return res.status(403).json({
+                success: false,
+                message: `You have exceeded the allowed cancellation limit. Your account has been blocked. Please contact support for further assistance.`
+            });
+        }
+
+        // Increase cancellation count
+        customer.cancellationCount++;
+        await customer.save();
+
+        // Now cancel booking
         booking.status = 'cancelled';
         booking.cancelReason = 'Cancelled by customer';
-
         await booking.save();
 
         res.status(200).json({
-            message: 'Booking cancelled successfully!.',
+            message: 'Booking cancelled successfully!',
             success: true,
             booking
         });
-    } 
-    catch (err) {
+
+    } catch (err) {
+        console.error(err);
         res.status(500).json({ message: 'Error cancelling booking', success: false });
     }
 };
 
+
+
 exports.uploadProof = async (req, res) => {
     try {
         const { bookingId } = req.params;
+        const { receiptNumber } = req.body; // get OR number from frontend
+
         const booking = await Booking.findById(bookingId);
 
         if(!booking){
@@ -349,6 +507,8 @@ exports.uploadProof = async (req, res) => {
         const proofFiles = req.files.map(file => file.path); 
         booking.proofImages.push(...proofFiles);
 
+        if(receiptNumber) booking.receiptNumber = receiptNumber; // save OR number
+
         await booking.save();
 
         res.status(200).json({ success: true, message: 'Proof uploaded successfully', booking });
@@ -357,6 +517,7 @@ exports.uploadProof = async (req, res) => {
         res.status(500).json({ success: false, message: 'Error uploading proof' });
     }
 };
+
 
 exports.cancelBookingByTechnician = async (req, res) => {
     try {

@@ -167,7 +167,7 @@ const TechAccount = () => {
                                             onClick={() => setShowEditModal(true)}
                                             className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-sm cursor-pointer ease-in-out duration-300 text-sm"
                                         >
-                                            <Edit className="w-4 h-4 mr-2" />
+                                            
                                             Edit Profile
                                         </button>
                                     </div>
@@ -234,16 +234,14 @@ const TechAccount = () => {
 
                             <div className="bg-white rounded-md shadow-sm border border-gray-200 overflow-hidden">
                                 <div className="bg-gradient-to-r from-red-50 to-red-100/50 px-6 py-4 border-b border-gray-200">
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex items-center justify-between gap-3">
                                         <div className='leading-4'>
                                             <h2 className="text-md font-semibold text-gray-900">Password & Security</h2>
-                                            <p className="text-xs text-gray-500 mt-0.5">Manage your account security</p>
                                         </div>
                                         <button
                                             onClick={() => setShowPasswordModal(true)}
                                             className="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-sm cursor-pointer transition-colors duration-200 shadow-lg hover:shadow-xl text-sm"
                                         >
-                                            <Lock className="w-4 h-4 mr-2" />
                                             Change Password
                                         </button>
                                     </div>
@@ -267,7 +265,7 @@ const TechAccount = () => {
                 </div>
 
                 {showEditModal && (
-                    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
+                    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
                         <div className="bg-white rounded-sm shadow-2xl w-full max-w-3xl animate-fade-in mx-auto flex flex-col max-h-[90vh] overflow-hidden">
                             <div className="bg-green-600 px-6 py-4 flex-shrink-0">
                                 <div className="flex items-center justify-between">
@@ -414,7 +412,7 @@ const TechAccount = () => {
 
                 {/* Change Password Modal */}
                 {showPasswordModal && (
-                    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
+                    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
                         <div className="bg-white rounded-sm shadow-2xl w-full max-w-md animate-fade-in mx-auto flex flex-col max-h-[90vh] overflow-hidden">
                             <div className="bg-green-600 px-6 py-4 flex-shrink-0">
                                 <div className="flex items-center justify-between">

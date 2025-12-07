@@ -77,6 +77,18 @@ const bookingSchema = new mongoose.Schema({
             type: String,
         }
     ],
+    receiptNumber: {
+        type: String,
+        default: null,
+    },
+    serviceChangeLogs: [
+    {
+        from: { type: String },
+        to: { type: String },
+        changedAt: { type: Date, default: Date.now }
+    }
+],
+
 
 }, { timestamps: true });
 

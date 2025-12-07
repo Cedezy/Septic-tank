@@ -33,6 +33,7 @@ exports.createUser = async (req, res) => {
             street,
             birthdate,
             age,
+            isActive: true,
             isVerified: true
         });
          const userType = role ? role.charAt(0).toUpperCase() + role.slice(1) : 'User';
@@ -63,7 +64,7 @@ exports.getAllUsers = async (req, res) => {
         const users = await User.find(
             { role: { $in: ['customer', 'manager', 'technician'] } },
             '-password'
-        ).sort({ createdAt: -1 });
+        );
 
         res.json({
             success: true,
@@ -83,30 +84,33 @@ exports.getUserByRole = async (req, res) => {
     try {
         const role = req.params.role;
 
-        const users = await User.find({ role })
-            .sort({ createdAt: -1 })
-            .select('-password'); // exclude password
+        // Find all customerIds that have completed a booking
+        const completedCustomerIds = await Booking.distinct("customerId", { status: "completed" });
 
-        if (!users.length) {
-            return res.status(404).json({
-                success: false,
-                message: 'No users found with that role.'
-            });
-        }
+        // Get users with the role but exclude those in completedCustomerIds
+        const users = await User.find({
+            role,
+            _id: { $nin: completedCustomerIds } // exclude completed users
+        })
+        .select('-password')
+        .sort({ createdAt: -1 });
 
         res.json({
             success: true,
-            message: 'Users fetched successfully.',
+            message: "Users fetched successfully (excluding completed customers).",
             users
         });
+
     } catch (err) {
         res.status(500).json({
             success: false,
-            message: 'Failed to get users by role.',
+            message: "Failed to get users by role.",
             error: err.message
         });
     }
 };
+
+
 
 exports.updateUser = async (req, res) => {
   try {

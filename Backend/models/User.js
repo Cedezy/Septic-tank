@@ -33,6 +33,10 @@ const userSchema = new mongoose.Schema({
     street: { type: String },
     age: { type: Number },
     birthdate: { type: Date },
+     gender: {
+        type: String,
+        enum: ['male', 'female', 'other'],
+    },
     otp: {
         type: String
     },
@@ -48,6 +52,14 @@ const userSchema = new mongoose.Schema({
     isActive: { 
         type: Boolean, 
         default: true 
+    },
+    cancellationCount: { 
+        type: Number, 
+        default: 0 
+    },
+    lastCancellation: { 
+        type: Date, 
+        default: null 
     },
 }, { 
     timestamps: true 

@@ -2,9 +2,9 @@ const Booking = require('../models/Booking');
 
 exports.getCustomersFromBookings = async (req, res) => {
     try {
-        const bookings = await Booking.find()
-            .populate('customerId', '-password') // includes address fields now
-            .sort({ createdAt: -1 }); // newest bookings first
+        const bookings = await Booking.find({ status: 'completed' }) // ← FILTER HERE
+            .populate('customerId', '-password')
+            .sort({ createdAt: -1 });
 
         const customerMap = new Map();
 
@@ -37,7 +37,6 @@ exports.getCustomersFromBookings = async (req, res) => {
             }
         });
 
-        // Convert map → array and sort by lastBookingDate
         const uniqueCustomers = Array.from(customerMap.values())
             .sort((a, b) => b.lastBookingDate - a.lastBookingDate);
 

@@ -9,7 +9,7 @@ import {
     HelpCircle,
     Settings,
     ChevronLeft,
-    ChevronRight,
+    Wrench,
     ChevronDown,
     Phone,
     Info,
@@ -31,6 +31,7 @@ const SidebarAdmin = ({ isCollapsed }) => {
         { id: 'user-accounts', label: 'Registered User', icon: UserCheck, path: '/admin/users' },
         { id: 'customers', label: 'Customers', icon: Users, path: '/admin/customers' },
         { id: 'bookings', label: 'Bookings', icon: Calendar, path: '/admin/bookings' },
+        { id: 'services1', label: 'Services', icon: Wrench, path: '/admin/services1' },
         { id: 'about', label: 'About Us', icon: Info, path: '/admin/about' },
         { id: 'contact', label: 'Contact Us', icon: Phone, path: '/admin/contact' },
         { id: 'faqs', label: 'FAQs', icon: HelpCircle, path: '/admin/faqs' },
@@ -52,7 +53,6 @@ const SidebarAdmin = ({ isCollapsed }) => {
             submenu: [
                 { label: 'Services', path: '/admin/services' },
                 { label: 'Gallery', path: '/admin/gallery' },
-                { label: 'Technician', path: '/admin/technician' },
             ],
         },
     ];

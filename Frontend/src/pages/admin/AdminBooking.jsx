@@ -24,7 +24,8 @@ import {
   Calendar,
   StickyNote,
   HelpCircle,
-  Printer 
+  Printer,
+  Fingerprint  
 } from "lucide-react";
 import { useRef } from 'react';
 import { handlePrint } from '../../utils/PrintUtils';
@@ -193,7 +194,7 @@ const AdminBooking = () => {
                                 <select value={filterType} 
                                     onChange={(e) => {
                                         setFilterType(e.target.value);
-                                        setHasSelected(true); // 👈 triggers field visibility
+                                        setHasSelected(true); 
                                     }}
                                     className="px-3 py-2 border-2 border-gray-400 rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none cursor-pointer w-[200px]"> 
                                     <option value="all">All</option> 
@@ -205,7 +206,7 @@ const AdminBooking = () => {
                                 </select> 
                             </div>
 
-                            {hasSelected && filterType === "all" && (
+                            {filterType === "all" && (
                                 <div className="relative flex items-center gap-2">
                                     <div className="relative">
                                         <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -487,27 +488,25 @@ const AdminBooking = () => {
                                 </div>
                             )}
 
-                            {hasSelected &&
-                                (filterType === "all" ||
-                                filterType === "name" ||
-                                filterType === "remarks" ||
-                                filterType === "serviceType" ||
-                                filterType === "technician" ||
-                                filterType === "date") && (
-                                <button
-                                    onClick={handleSearch}
-                                    className="px-5 py-2 bg-green-600 text-white rounded-sm cursor-pointer hover:bg-green-700 focus:ring-2 focus:ring-green-400 flex justify-center items-center gap-1 ease-in-out duration-300"
-                                >
-                                    <Search className="w-4 h-4" />
-                                    Search
-                                </button>
-                            )}
+                          
+                            <button
+                                onClick={handleSearch}
+                                className="px-5 py-2 bg-green-600 text-white rounded-sm cursor-pointer hover:bg-green-700 focus:ring-2 focus:ring-green-400 flex justify-center items-center gap-1 ease-in-out duration-300"
+                            >
+                                <Search className="w-4 h-4" />
+                                Search
+                            </button>
+                            
                         </div>  
+                        
                         <div ref={printRef} className="bg-white rounded-sm shadow-sm border border-gray-200 max-h-[500px] overflow-y-auto">
                             <h1 className="print-title hidden">Customer Bookings</h1>
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50 sticky top-0 z-10">
-                                    <tr>
+                                    <tr className='whitespace-nowrap'>
+                                        <th className="px-4 py-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+                                            Booking ID
+                                        </th>
                                         <th className="px-4 py-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
                                             Customer Name
                                         </th>
@@ -529,7 +528,7 @@ const AdminBooking = () => {
                                         <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
                                             Remarks
                                         </th>
-                                        <th className="px-6 py-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+                                        <th className="px-4 py-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
                                             Reason
                                         </th>
                                     </tr>
@@ -537,7 +536,7 @@ const AdminBooking = () => {
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     {bookings.length === 0 ? (
                                         <tr>
-                                            <td colSpan="8" className="text-center py-16">
+                                            <td colSpan="9" className="text-center py-16">
                                                 <div className="flex flex-col items-center">
                                                     <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                                                         <FileWarning className="w-8 h-8 text-gray-400" />
@@ -553,7 +552,7 @@ const AdminBooking = () => {
                                         </tr>
                                     ) : filteredBookings.length === 0 ? (
                                         <tr>
-                                            <td colSpan="8" className="text-center py-16">
+                                            <td colSpan="9" className="text-center py-16">
                                                 <div className="flex flex-col items-center">
                                                     <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                                                         <FileWarning className="w-8 h-8 text-gray-400" />
@@ -577,6 +576,9 @@ const AdminBooking = () => {
                                                     setSelectedBooking(booking);
                                                     setShowDetailsModal(true);
                                                 }}>
+                                                <td className="px-4 py-4 text-sm text-gray-800 font-mono font-medium white">
+                                                    BOOK{booking._id.slice(-4).toUpperCase()}
+                                                </td>
                                                 <td className="px-4 py-4 text-sm text-gray-900">
                                                     {booking.customerId?.fullname}
                                                 </td>
@@ -587,14 +589,14 @@ const AdminBooking = () => {
                                                     {formatCurrency(booking.price)}
                                                 </td>
                                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {formatDate(booking.date)}
+                                                    {shortFormatDate(booking.date)}
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                                                     {booking.time}
                                                 </td>
                                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                                                     {booking.technicianId?.fullname ? (
-                                                        <div className="text-sm text-gray-800">
+                                                        <div className="text-sm text-gray-800 font-medium">
                                                             {booking.technicianId.fullname}
                                                         </div>
                                                     ) : (
@@ -603,16 +605,16 @@ const AdminBooking = () => {
                                                         </span>
                                                     )}
                                                 </td>
-                                                <td className="px-6 py-8">
+                                                <td className="px-6 py-6">
                                                     <span className={`capitalize ${getStatusBadge(booking.status)}`}>
                                                         {booking.status}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-8 text-sm italic text-gray-600">
+                                                <td className="px-4 py-6 text-sm italic text-gray-600">
                                                     {booking.status === "cancelled" || booking.status === "declined" ? (
                                                         booking.cancelReason || "No reason provided"
                                                     ) : (
-                                                        "Not applicable"
+                                                        ""
                                                     )}
                                                 </td>
                                             </tr>
@@ -629,7 +631,7 @@ const AdminBooking = () => {
                                 )}
                             </div>
                         </div>
-                        <div className="flex justify-end py-4 bg-white border-t border-gray-200">        
+                        <div className="flex justify-end">        
                              <button onClick={() => handlePrint(printRef, {
                                     title: 'List of Customers',
                                     customDate: new Date().toLocaleDateString('en-US', { 
@@ -647,7 +649,7 @@ const AdminBooking = () => {
 
             {showDetailsModal && selectedBooking && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-                    <div className="bg-white rounded-sm shadow-2xl w-full max-w-4xl animate-fade-in flex flex-col max-h-[90vh] overflow-hidden">
+                    <div className="bg-white rounded-sm shadow-2xl w-full max-w-5xl animate-fade-in flex flex-col max-h-[90vh] overflow-hidden">
                         <div className="bg-green-600 px-6 py-4 flex-shrink-0">
                             <div className="flex items-center space-x-3">
                                 <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
@@ -675,12 +677,30 @@ const AdminBooking = () => {
                                     <h4 className="text-sm font-semibold text-gray-700 uppercase">Customer Information</h4>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                                    <div>
+                                        <label className="text-xs font-semibold text-gray-500 mb-1 block">Customer ID</label>
+                                        <div className="flex items-center space-x-2">
+                                            <User className="w-4 h-4 text-gray-500" />
+                                            <p className="font-semibold text-gray-900 font-mono">
+                                                CUST{selectedBooking.customerId._id.slice(-4).toUpperCase()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-semibold text-gray-500 mb-1 block">Booking ID</label>
+                                        <div className="flex items-center space-x-2">
+                                            <Fingerprint  className="w-4 h-4 text-gray-500" />
+                                            <p className="font-semibold text-gray-900 font-mono">
+                                                BOOK{selectedBooking._id.slice(-4).toUpperCase()}
+                                            </p>
+                                        </div>
+                                    </div>
                                     <div>
                                         <label className="text-xs font-semibold text-gray-500 mb-1 block">Customer Name</label>
                                         <div className="flex items-center space-x-2">
                                             <User className="w-4 h-4 text-gray-500" />
-                                            <p className="text-sm font-medium text-gray-900">
+                                            <p className="font-medium text-gray-900">
                                                 {selectedBooking.customerId?.fullname}
                                             </p>
                                         </div>
@@ -689,22 +709,16 @@ const AdminBooking = () => {
                                         <label className="text-xs font-semibold text-gray-500 mb-1 block">Contact Number</label>
                                         <div className="flex items-center space-x-2">
                                             <Phone className="w-4 h-4 text-gray-500" />
-                                            <p className="text-sm font-medium text-gray-900">
+                                            <p className="font-medium text-gray-900">
                                                 {selectedBooking.customerId?.phone}
                                             </p>
                                         </div>
-                                    </div>
-                                    <div>
-                                        <label className="text-xs font-semibold text-gray-500 mb-1 block">Service Amount</label>
-                                        <p className="text-sm font-bold text-green-600">
-                                            {formatCurrency(selectedBooking.price)}
-                                        </p>
                                     </div>
                                     <div className="md:col-span-2">
                                         <label className="text-xs font-semibold text-gray-500 mb-1 block">Service Address</label>
                                         <div className="flex items-start space-x-2">
                                             <MapPin className="w-4 h-4 text-gray-500" />
-                                            <p className="text-sm font-medium text-gray-900">
+                                            <p className="font-medium text-gray-900">
                                                 {selectedBooking.customerId?.street}, {selectedBooking.customerId?.barangay}, {selectedBooking.customerId?.city}, {selectedBooking.customerId?.province}
                                             </p>
                                         </div>
@@ -723,15 +737,20 @@ const AdminBooking = () => {
                                         <label className="text-xs font-semibold text-gray-500 mb-1 block">Service Type</label>
                                         <div className="flex items-center space-x-2">
                                             <Building2 className="w-4 h-4 text-gray-500" />
-                                            <p className="text-sm font-medium text-gray-900">{selectedBooking.serviceType?.name}</p>
+                                            <p className="font-medium text-gray-900">{selectedBooking.serviceType?.name}</p>
                                         </div>
                                     </div>
-
+                                    <div>
+                                        <label className="text-xs font-semibold text-gray-500 mb-1 block">Service Amount</label>
+                                        <p className="font-bold text-green-600">
+                                            {formatCurrency(selectedBooking.price)}
+                                        </p>
+                                    </div>
                                     <div>
                                         <label className="text-xs font-semibold text-gray-500 mb-1 block">Booking Date</label>
                                         <div className="flex items-center space-x-2">
                                             <Calendar className="w-4 h-4 text-gray-500" />
-                                            <p className="text-sm font-medium text-gray-900">{shortFormatDate(selectedBooking.createdAt)}</p>
+                                            <p className="font-medium text-gray-900">{shortFormatDate(selectedBooking.createdAt)}</p>
                                         </div>
                                     </div>
 
@@ -739,7 +758,7 @@ const AdminBooking = () => {
                                         <label className="text-xs font-semibold text-gray-500 mb-1 block">Service Date</label>
                                         <div className="flex items-center space-x-2">
                                             <Calendar className="w-4 h-4 text-gray-500" />
-                                            <p className="text-sm font-medium text-gray-900">{shortFormatDate(selectedBooking.date)}</p>
+                                            <p className="font-medium text-gray-900">{shortFormatDate(selectedBooking.date)}</p>
                                         </div>
                                     </div>
 
@@ -747,7 +766,7 @@ const AdminBooking = () => {
                                         <label className="text-xs font-semibold text-gray-500 mb-1 block">Service Time</label>
                                         <div className="flex items-center space-x-2">
                                             <Clock className="w-4 h-4 text-gray-500" />
-                                            <p className="text-sm font-medium text-gray-900">{selectedBooking.time}</p>
+                                            <p className="font-medium text-gray-900">{selectedBooking.time}</p>
                                         </div>
                                     </div>
 
@@ -755,7 +774,7 @@ const AdminBooking = () => {
                                         <label className="text-xs font-semibold text-gray-500 mb-1 block">Duration</label>
                                         <div className="flex items-center space-x-2">
                                             <Clock className="w-4 h-4 text-gray-500" />
-                                            <p className="text-sm font-medium text-gray-900">{selectedBooking.duration} hours</p>
+                                            <p className="font-medium text-gray-900">{selectedBooking.duration} hours</p>
                                         </div>
                                     </div>
 
@@ -763,23 +782,11 @@ const AdminBooking = () => {
                                         <label className="text-xs font-semibold text-gray-500 mb-1 block">Assigned Technician</label>
                                         <div className="flex items-center space-x-2">
                                             <Wrench className="w-4 h-4 text-gray-500" />
-                                            <p className="text-sm font-medium text-gray-900">
+                                            <p className="font-medium text-gray-900">
                                             {selectedBooking.technicianId?.fullname || 'Not assigned yet'}
                                             </p>
                                         </div>
                                     </div>
-
-                                    {selectedBooking.tankSize && (
-                                        <div className='col-span-2'>
-                                            <label className="text-xs font-semibold text-gray-500 mb-1 block">Tank Specifications</label>
-                                            <div className="flex items-center space-x-2">
-                                                <Package className="w-4 h-4 text-gray-500" />
-                                                <p className="text-sm font-medium text-gray-900 capitalize">
-                                                    {selectedBooking.tankSize} ({selectedBooking.capacity} Liters)
-                                                </p>
-                                            </div>
-                                        </div>
-                                    )}
                                 </div>
                             </div>  
                             {selectedBooking.notes && (

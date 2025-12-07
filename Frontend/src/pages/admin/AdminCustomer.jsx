@@ -8,6 +8,7 @@ import { Search, UserX, CalendarDays, Printer, Users, FileText } from 'lucide-re
 import { useRef } from 'react';
 import { handlePrint } from '../../utils/PrintUtils';
 import { getStatusBadge } from '../../utils/BookingStats';
+import logo from '../../assets/logo.png'
 
 const BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
@@ -133,7 +134,7 @@ const AdminCustomer = () => {
     }, [filterType, customers]);
 
     return (
-        <div className="h-screen flex">
+        <div className="h-screen overflow-hidden flex">
             <div className='w-full'>
                 <div className="mb-36">
                     <HeaderAdmin />
@@ -149,42 +150,38 @@ const AdminCustomer = () => {
                         <div className="flex flex-col justify-center md:flex-row gap-2 items-center">
                             <div className="relative flex items-center gap-2">
                                 <span className="absolute -top-2 left-2 bg-white px-2 text-xs text-gray-600">Search by</span>
+
                                 <select
-                                value={filterType}
-                                onChange={(e) => {
-                                    setFilterType(e.target.value);
-                                    setHasSelected(true); // ✅ Show input after user interaction
-                                }}
-                                className="px-3 py-2 border-2 border-gray-400 rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none cursor-pointer"
-                                >
-                                <option value="all">All</option>
-                                <option value="name">Customer Name</option>
-                                <option value="address">Address</option>
+                                    value={filterType}
+                                    onChange={(e) => setFilterType(e.target.value)}
+                                    className="px-3 py-2 border-2 border-gray-400 rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none cursor-pointer">
+                                    <option value="all">All</option>
+                                    <option value="name">Customer Name</option>
+                                    <option value="address">Address</option>
                                 </select>
                             </div>
-                            {hasSelected && (filterType === "all" || filterType === "name" || filterType === "address") && (
-                                <div className="relative flex items-center gap-2">
+                            <div className="relative flex items-center gap-2">
                                 <div className="relative">
                                     <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Search className="w-4 h-4 text-gray-400" />
+                                        <Search className="w-4 h-4 text-gray-400" />
                                     </span>
+
                                     <input
-                                    type="text"
-                                    placeholder={
-                                        filterType === "name"
-                                        ? "Search by customer name"
-                                        : filterType === "address"
-                                        ? "Search by address (street, barangay, city)"
-                                        : "Search"
-                                    }
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                                    className="px-8 py-2 border-2 border-gray-400 rounded-md w-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        type="text"
+                                        placeholder={
+                                            filterType === "name"
+                                                ? "Search by customer name"
+                                                : filterType === "address"
+                                                ? "Search by address (street, barangay, city)"
+                                                : "Search"
+                                        }
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                                        className="px-8 py-2 border-2 border-gray-400 rounded-md w-md focus:outline-none focus:ring-2 focus:ring-green-500"
                                     />
                                 </div>
 
-                                {/* ✅ Search button only shows after selection */}
                                 <button
                                     onClick={handleSearch}
                                     className="px-5 py-2 bg-green-600 text-white rounded-sm cursor-pointer hover:bg-green-700 focus:ring-2 focus:ring-green-400 flex items-center gap-1 ease-in-out duration-300"
@@ -192,20 +189,20 @@ const AdminCustomer = () => {
                                     <Search className="w-4 h-4" />
                                     Search
                                 </button>
-                                </div>
-                            )}
+                            </div>
                         </div>
 
-                        <div ref={printRef} className="bg-white rounded-sm shadow-sm border border-gray-200 overflow-hidden">
+
+                        <div ref={printRef} className="bg-white rounded-sm shadow-sm border border-gray-200 max-h-[500px] overflow-y-auto">
                             <h1 className="print-title hidden">List of Customers</h1>
                             <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
+                                <thead className="bg-gray-50 sticky top-0 z-10">
                                     <tr>
                                         <th className="px-4 py-6 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">
                                             Customer ID
                                         </th>
                                         <th className="px-6 py-6 text-left text-xs font-medium text-gray-500 uppercase">
-                                            Full Name
+                                            Customer Name
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                                             Email Address
@@ -282,7 +279,7 @@ const AdminCustomer = () => {
                                 )}
                             </div>
                         </div>
-                        <div className="flex justify-end py-4 bg-white border-t border-gray-200">        
+                        <div className="flex justify-end">        
                              <button onClick={() => handlePrint(printRef, {
                                     title: 'List of Customers',
                                     customDate: new Date().toLocaleDateString('en-US', { 
@@ -337,7 +334,7 @@ const AdminCustomer = () => {
                                             <span className="text-sm text-gray-900 font-medium">{formatDate(selectedUser.birthdate)}</span>
                                         </div>
                                         <div className="grid grid-cols-[140px_1fr] py-3.5 border-b border-gray-200">
-                                            <span className="text-sm font-medium text-gray-600">Gender</span>
+                                            <span className="text-sm font-medium text-gray-600">Sex</span>
                                             <span className="text-sm text-gray-900 font-medium">Male</span>
                                         </div>
 
@@ -378,7 +375,7 @@ const AdminCustomer = () => {
                                             <div className="overflow-x-auto rounded-sm border border-gray-200 shadow-sm">
                                                 <table className="min-w-full divide-y divide-gray-200 bg-white">
                                                     <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
-                                                        <tr>
+                                                        <tr className='whitespace-nowrap'>
                                                             <th className="px-5 py-6 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                                                                 Booking ID
                                                             </th>
@@ -394,6 +391,9 @@ const AdminCustomer = () => {
                                                             <th className="px-5 py-3.5 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                                                                 Technician
                                                             </th>
+                                                            <th className="px-5 py-3.5 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">
+                                                                OFFICIAL RECIEPT
+                                                            </th>
                                                             <th className="px-5 py-3.5 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                                                                 Reason
                                                             </th>
@@ -404,35 +404,45 @@ const AdminCustomer = () => {
                                                     </thead>
                                                     <tbody className="divide-y divide-gray-200">
                                                         {bookingHistory.map((b) => (
-                                                            <tr key={b._id}
-                                                                onClick={() => handleRowClick(b)}
-                                                                className="hover:bg-green-50 transition-colors cursor-pointer">
-                                                                <td className="px-5 py-6 text-sm text-gray-800 font-mono font-medium">
+                                                            <tr key={b._id}>
+                                                                <td className="px-6 py-6 text-sm text-gray-800 font-mono font-medium">
                                                                     BOOK{b._id.slice(-4).toUpperCase()}
                                                                 </td>
-                                                                <td className="px-5 py-4 text-sm text-gray-800">
+                                                                <td className="px-4 py-4 text-sm text-gray-800">
                                                                     {shortFormatDate(b.createdAt)}
                                                                 </td>
-                                                                <td className="px-5 py-4 text-sm text-gray-800">
+                                                                <td className="px-4 py-4 text-sm text-gray-800">
                                                                     {b.serviceType?.name || "N/A"}
                                                                 </td>
-                                                                <td className="px-5 py-4 text-sm text-gray-800 font-semibold">
+                                                                <td className="px-4 py-4 text-sm text-gray-800 font-semibold whitespace-nowrap">
                                                                     {formatCurrency(b.price)}
                                                                 </td>
-                                                                <td className={`px-5 py-4 text-sm ${
+                                                                <td className={`px-4 py-4 text-sm ${
                                                                     b.technicianId ? 'text-gray-800' : 'text-gray-400 italic'
                                                                     }`}
                                                                     >
                                                                     {b.technicianId?.fullname || 'No technician assigned'}
                                                                 </td>
-                                                                <td className="px-6 py-8 text-sm italic text-gray-600">
+                                                                <td className="px-4 sm:px-6 py-4 text-sm text-center">
+                                                                    {b.status === "completed" ? (
+                                                                        <span
+                                                                            className="px-4 sm:px-6 py-4 text-sm text-blue-600 font-semibold underline cursor-pointer"
+                                                                                onClick={() => handleRowClick(b)}
+                                                                            >
+                                                                            OR
+                                                                        </span>
+                                                                    ) : (
+                                                                        <span className="text-gray-400">—</span>  // or leave blank
+                                                                    )}
+                                                                </td>
+                                                                <td className="px-4 py-8 text-sm italic text-gray-600">
                                                                     {b.status === "cancelled" || b.status === "declined" ? (
                                                                         b.cancelReason || "No reason provided"
                                                                     ) : (
-                                                                        "Not applicable"
+                                                                        <span className="text-gray-400">—</span>
                                                                     )}
                                                                 </td>
-                                                                <td className="px-5 py-4 text-sm">
+                                                                <td className="px-6 py-4 text-sm">
                                                                     <span className={`${getStatusBadge(b.status)} capitalize`}>
                                                                         {b.status}
                                                                     </span>
@@ -471,13 +481,20 @@ const AdminCustomer = () => {
 
                 {showProofImagesModal && selectedBooking && (
                     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-                        <div className="bg-white shadow-2xl rounded-sm w-full max-w-3xl animate-fade-in flex flex-col max-h-[90vh] overflow-hidden">
+                        <div id="printable-receipt" className="bg-white shadow-2xl rounded-sm w-full max-w-3xl animate-fade-in flex flex-col max-h-[90vh] overflow-hidden">
                             <div className="bg-white px-8 py-6 border-b-2 border-dashed border-gray-300 flex-shrink-0">
                                 <div className="text-center mb-4">
-                                    <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-3">
-                                        <FileText className="w-8 h-8 text-green-600" />
+                                    <div className="flex justify-center mb-3">
+                                        <img 
+                                            className="h-20 w-auto object-contain" 
+                                            src={logo} 
+                                            alt="RMG Logo" 
+                                        />
                                     </div>
-                                    <h2 className="text-2xl font-bold text-gray-800">SERVICE RECEIPT</h2>
+                                    <div className="inline-flex items-center justify-center mb-3">
+                                        <h2 className='font-bold text-2xl text-gray-800'>RMG SEPTIC TANK CLEANING SERVICES</h2>
+                                    </div>
+                                    <h2 className="text-xl font-bold text-gray-700">OFFICIAL RECEIPT</h2>
                                     <p className="text-sm text-gray-500 mt-1">Official Booking Confirmation</p>
                                 </div>
                                 
@@ -485,7 +502,9 @@ const AdminCustomer = () => {
                                     <div>
                                         <p className="text-gray-500">Receipt No.</p>
                                         <p className="font-mono font-bold text-gray-900">
-                                            BOOK{selectedBooking._id.slice(-6).toUpperCase()}
+                                            {selectedBooking.receiptNumber 
+                                                ? selectedBooking.receiptNumber 
+                                                : `BOOK${selectedBooking._id.slice(-6).toUpperCase()}`}
                                         </p>
                                     </div>
                                     <div className="text-right">
@@ -529,25 +548,22 @@ const AdminCustomer = () => {
                                                 <span className="text-sm text-gray-600">Service Date:</span>
                                             </div>
                                             <span className="text-sm font-semibold text-gray-900">
-                                                {formatDate(selectedBooking.date)} at {selectedBooking.time}
+                                                {formatDate(selectedBooking.date)} 
                                             </span>
                                         </div>
-
                                         <div className="flex justify-between items-start">
                                             <div className="flex items-center space-x-2">
-                                                <span className="text-sm text-gray-600">Technician:</span>
+                                                <span className="text-sm text-gray-600">Service Date:</span>
                                             </div>
-                                            <span className={`text-sm font-semibold ${
-                                                selectedBooking.technicianId ? 'text-gray-900' : 'text-gray-400 italic'
-                                            }`}>
-                                                {selectedBooking.technicianId?.fullname || 'Not assigned'}
+                                            <span className="text-sm font-semibold text-gray-900">
+                                                {selectedBooking.time}
                                             </span>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Amount Section */}
-                                <div className="mb-6 bg-gray-50 -mx-8 px-8 py-4">
+                                <div className=" bg-gray-50 -mx-8 px-8 py-4">
                                     <div className="flex justify-between items-center">
                                         <span className="text-sm font-semibold text-gray-700">Service Amount</span>
                                         <span className="text-2xl font-bold text-green-600">
@@ -556,46 +572,24 @@ const AdminCustomer = () => {
                                     </div>
                                 </div>
 
-                                {/* Proof of Service Section */}
                                 <div>
+                                    <span className='text-xs text-gray-400 italic'
+                                    >This reciept was given by 
+                                    <span className='font-semibold'> {selectedBooking.technicianId?.fullname}</span>
+                                    </span>
+                                </div>
+
+                                {/* Proof of Service Section */}
+                                <div className='mt-6'>
                                     <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 pb-2 border-b border-gray-200">
                                         Proof of Service
                                     </h3>
-
-                                    {selectedBooking.status === "pending" && (
-                                        <div className="text-center py-8 bg-gray-50 rounded-lg">
-                                            <p className="text-sm text-gray-500 italic">No proof yet — booking is still pending.</p>
-                                        </div>
-                                    )}
-
-                                    {selectedBooking.status === "confirmed" && (
-                                        <div className="text-center py-8 bg-gray-50 rounded-lg">
-                                            <p className="text-sm text-gray-500 italic">No proof yet — service is confirmed but not completed.</p>
-                                        </div>
-                                    )}
-
-                                    {selectedBooking.status === "declined" && (
-                                        <div className="text-center py-8 bg-gray-50 rounded-lg">
-                                            <p className="text-sm text-gray-500 italic">No proof available — service was declined.</p>
-                                        </div>
-                                    )}
-
-                                    {selectedBooking.status === "cancelled" && (
-                                        <div className="text-center py-8 bg-gray-50 rounded-lg">
-                                            <p className="text-sm text-gray-500 italic">No proof available — booking was cancelled.</p>
-                                        </div>
-                                    )}
 
                                     {(selectedBooking.status !== "pending" &&
                                         selectedBooking.status !== "confirmed" &&
                                         selectedBooking.status !== "cancelled" &&
                                         selectedBooking.proofImages.length > 0) && (
                                         <>
-                                            <div className="mb-4">
-                                                <p className="text-xs text-gray-600 bg-green-50 inline-block px-3 py-1 rounded-full">
-                                                    {selectedBooking.proofImages.length} image{selectedBooking.proofImages.length > 1 ? "s" : ""} attached
-                                                </p>
-                                            </div>
 
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 {selectedBooking.proofImages.map((img, index) => (
@@ -634,17 +628,6 @@ const AdminCustomer = () => {
                                                                 </svg>
                                                             </button>
                                                         </div>
-
-                                                        <div className="p-3 bg-white border-t border-gray-200">
-                                                            <div className="flex items-center justify-between">
-                                                                <span className="text-xs font-semibold text-gray-700">
-                                                                    Proof Image {index + 1}
-                                                                </span>
-                                                                <span className="text-xs text-gray-500 uppercase tracking-wide">
-                                                                    Evidence
-                                                                </span>
-                                                            </div>
-                                                        </div>
                                                     </div>
                                                 ))}
                                             </div>
@@ -662,7 +645,14 @@ const AdminCustomer = () => {
 
                             {/* Receipt Footer */}
                             <div className="bg-gray-50 px-8 py-4 border-t-2 border-dashed border-gray-300 flex-shrink-0">
-                                <div className="flex justify-end items-center">
+                                <div className="flex justify-end items-center gap-2">
+                                    <button 
+                                        onClick={() => window.print()}
+                                        className="flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-sm cursor-pointer hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 shadow-sm hover:shadow-md"
+                                        >
+                                        <Printer className="w-4 h-4" />
+                                        Print
+                                    </button>
                                     <button
                                         type="button"
                                         onClick={() => { 
@@ -671,7 +661,7 @@ const AdminCustomer = () => {
                                         }}
                                         className="px-6 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50 hover:border-gray-400 transition cursor-pointer text-sm font-medium"
                                     >
-                                        Close Receipt
+                                        Close
                                     </button>
                                 </div>
                             </div>

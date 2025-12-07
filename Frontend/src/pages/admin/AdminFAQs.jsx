@@ -67,7 +67,7 @@ const AdminFAQs = () => {
     };
 
     return (
-        <div className="min-h-screen flex">
+        <div className="h-screen flex overflow-hidden">
             <div className='w-full'>
                 <div className="mb-36">
                     <HeaderAdmin />
@@ -94,7 +94,7 @@ const AdminFAQs = () => {
                             </div>
                             
                         </div>
-                        <div className="bg-white rounded-sm shadow-sm border border-gray-200 overflow-hidden">
+                        <div className="bg-white rounded-sm shadow-sm border border-gray-200 overflow-y-auto">
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-100">
                                     <tr>
@@ -131,9 +131,6 @@ const AdminFAQs = () => {
                                 </tbody>
                             </table>
                         </div>
-                        <div className="flex justify-end py-4 bg-white border-t border-gray-200">  
-                            
-                        </div>
                     </div>
                 
                     {showModal && (
@@ -151,12 +148,6 @@ const AdminFAQs = () => {
                                                 {editId ? 'Edit FAQ Item' : 'Create New FAQ'}
                                             </h3>
                                         </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowModal(false)}
-                                            className="text-gray-300 hover:text-white hover:bg-green-500 rounded-full p-2 transition-all duration-200 cursor-pointer">
-                                            <X className="w-5 h-5" />
-                                        </button>
                                     </div>
                                 </div>
 
@@ -169,13 +160,10 @@ const AdminFAQs = () => {
                                                 <span className="text-red-500 ml-1">*</span>
                                             </label>
                                             <div className="relative">
-                                                <svg className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
                                                 <input
                                                     type="text"
                                                     required
-                                                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 text-sm rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 placeholder-gray-400 text-gray-800"
+                                                    className="w-full pl-4 pr-4 py-3 border-2 border-gray-200 text-sm rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 placeholder-gray-400 text-gray-800"
                                                     placeholder="Enter frequently asked question..."
                                                     value={form.question}
                                                     onChange={(e) => setForm({ ...form, question: e.target.value })}
@@ -191,13 +179,10 @@ const AdminFAQs = () => {
                                                 <span className="text-red-500 ml-1">*</span>
                                             </label>
                                             <div className="relative">
-                                                <svg className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                </svg>
                                                 <textarea
                                                     required
                                                     rows={5}
-                                                    className="w-full text-sm pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 placeholder-gray-400 resize-none text-gray-800"
+                                                    className="w-full text-sm pl-4 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 placeholder-gray-400 resize-none text-gray-800"
                                                     placeholder="Provide a comprehensive answer..."
                                                     value={form.answer}
                                                     onChange={(e) => setForm({ ...form, answer: e.target.value })}
@@ -219,7 +204,10 @@ const AdminFAQs = () => {
                                         <div className="flex space-x-2">
                                             <button
                                                 type="button"
-                                                onClick={() => setShowModal(false)}
+                                                onClick={() => {
+                                                    setShowModal(false)
+                                                    setSelectedFaqs(null)
+                                                }}
                                                 className="px-6 py-2.5 border-2 border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all duration-200 font-medium cursor-pointer text-sm"
                                             >
                                                 Cancel

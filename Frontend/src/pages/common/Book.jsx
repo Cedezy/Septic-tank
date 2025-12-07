@@ -9,7 +9,6 @@ const Book = () => {
         <div className='min-h-screen'>
             <Header/>
             <Services/>
-            <Footer/>
         </div>
     );
 };

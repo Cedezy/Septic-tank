@@ -20,7 +20,8 @@ import {
   StickyNote,
   XCircle,
   ChevronLeft,
-  ChevronDown 
+  ChevronDown,
+  Printer 
 } from "lucide-react";
 import { Wrench, HeartPulse } from "lucide-react";
 import { AlertCircle, CheckCircle } from 'lucide-react';
@@ -28,15 +29,13 @@ import { EllipsisVertical } from "lucide-react";
 import {
   Briefcase,
 } from "lucide-react";
-import { Link } from 'react-router-dom';
-
+import logo from '../../assets/logo.png'
 const BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
 const TechSchedule = () => {
     const [bookings, setBookings] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [selectedBooking, setSelectedBooking] = useState(null);
-    const [showMapModal, setShowMapModal] = useState(false);
     const [filteredBookings, setFilteredBookings] = useState([]);
     const [filterType, setFilterType] = useState("all");
     const [startDate, setStartDate] = useState(null);
@@ -51,6 +50,22 @@ const TechSchedule = () => {
     const [showRemarksDropdown, setShowRemarksDropdown] = useState(false);
     const [showDeclineModal, setShowDeclineModal] = useState(false);
     const [selectedDeclineReason, setSelectedDeclineReason] = useState('');
+    const [showReciept, setShowReciept] = useState(false);
+    const [showPendingModal, setShowPendingModal] = useState(false);
+    const [showChangeServiceModal, setShowChangeServiceModal] = useState(false);
+    const [selectedTankSize, setSelectedTankSize] = useState("");
+    const [orNumber, setOrNumber] = useState('');
+    const [showServiceTypeModal, setShowServiceTypeModal] = useState(false)
+    const [showTankSizeModal, setShowTankSizeModal] = useState(false)
+    const [showFilterModal, setShowFilterModal] = useState(false);
+
+const filterOptions = [
+  { value: "all", label: "All" },
+  { value: "name", label: "Customer Name" },
+  { value: "serviceType", label: "Service Type" },
+  { value: "remarks", label: "Remarks" },
+  { value: "date", label: "Date" }
+];
 
 
     const fetchBookings = async () => {
@@ -89,6 +104,33 @@ const TechSchedule = () => {
             console.log(err);
         }
     };
+
+    const handleUpdateServiceType = async () => {
+
+        try {
+            const response = await axios.put(
+                `/book/technician/service/${selectedBooking._id}`,
+                { 
+                    serviceType: selectedBooking.newServiceType,
+                    tankSize: selectedTankSize
+                },
+                { withCredentials: true }
+            );
+
+            toast.success(response.data.message);
+            fetchBookings();
+            setShowChangeServiceModal(false);
+            setSelectedTankSize("");
+
+            setTimeout(() => {
+            setSelectedBooking(null);
+        }, 100);
+        } catch (err) {
+            console.error(err);
+            toast.error(err.response?.data?.message);
+        }
+    };
+
 
     const handleRespond = async (bookingId, action, reason) => {
         try {
@@ -177,6 +219,8 @@ const TechSchedule = () => {
 
     useEffect(() => {
         setSearch("");
+        setStartDate("")
+        setEndDate("")
         setFilteredBookings(bookings);
     }, [filterType, bookings]);
 
@@ -206,7 +250,7 @@ const TechSchedule = () => {
         return new Date(date).setHours(0,0,0,0) > today.setHours(0,0,0,0);
     };
 
-    const isBookingSelected = !!selectedBooking;
+    
 
     const handleProofUpload = async () => {
         if(proofFiles.length === 0) {
@@ -216,12 +260,14 @@ const TechSchedule = () => {
 
         const formData = new FormData();
         proofFiles.forEach(file => formData.append("proofImages", file));
+        formData.append("receiptNumber", orNumber); // <-- send OR number
 
-        try{
+        try {
             await axios.post(`/book/technician/proof/${selectedBooking._id}`, formData, {
                 headers: { "Content-Type": "multipart/form-data" },
                 withCredentials: true,
             });
+
             await updateStatus(selectedBooking._id, "completed");
             toast.success("Proof uploaded and booking completed!");
 
@@ -229,31 +275,37 @@ const TechSchedule = () => {
             setProofFiles([]);
             setSelectedBooking(null);
             fetchBookings();
-
         } 
         catch(err){
             console.error(err);
         }
     };
 
+
+    const formatHours = (hrs) => {
+        return `${hrs} hour${hrs > 1 ? "s" : ""}`;
+    };
+
+
     return (
         <SidebarTech>
             <div className="max-w-7xl mx-auto h-screen">    
                 <div className='max-w-7xl mx-auto'>
-                    <div className='flex flex-col gap-5 py-10'>
+                    <div className='flex flex-col gap-5'>
                         <div className="flex items-center justify-between">
                             <div className='leading-4 pl-4'>
                                 <h1 className="text-xl md:text-3xl uppercase font-medium tracking-wider text-gray-700">My Service Schedules</h1>
                                 <p className="text-gray-600 text-sm">View and manage your service schedules.</p>
                             </div>
                         </div>
-                        <div className="flex flex-col justify-center md:flex-row gap-3 items-center">
-                            <div className="relative flex items-center gap-2">
+                        <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center px-4 md:px-0">
+                            {/* Search By Dropdown */}
+                            <div className="relative flex items-center">
                                 <span className="absolute -top-2 left-2 bg-white px-2 text-xs text-gray-600">Search by</span>
                                 <select
                                     value={filterType}
                                     onChange={(e) => setFilterType(e.target.value)}
-                                    className="px-3 py-2 border-2 border-gray-400 rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none cursor-pointer w-[200px]"
+                                    className="w-full md:w-[200px] px-3 py-2 border-2 border-gray-400 rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none cursor-pointer"
                                 >
                                     <option value="all">All</option>
                                     <option value="name">Customer Name</option>
@@ -263,8 +315,9 @@ const TechSchedule = () => {
                                 </select>
                             </div>
 
+                            {/* All Filter */}
                             {filterType === "all" && (
-                                <div className="relative">
+                                <div className="relative w-full md:w-auto">
                                     <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <Search className="w-4 h-4 text-gray-400" />
                                     </span>
@@ -274,15 +327,14 @@ const TechSchedule = () => {
                                         value={search}
                                         onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                                         onChange={(e) => setSearch(e.target.value)}
-                                        className="px-8 py-2 border-2 border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 w-sm"
+                                        className="w-full md:w-[250px] px-8 py-2 border-2 border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                                     />
                                 </div>
                             )}
 
-
-                            {/* Customer Name */}
+                            {/* Customer Name Filter */}
                             {filterType === "name" && (
-                                <div className="relative">
+                                <div className="relative w-full md:w-auto">
                                     <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <Search className="w-4 h-4 text-gray-400" />
                                     </span>
@@ -292,20 +344,21 @@ const TechSchedule = () => {
                                         value={search}
                                         onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                                         onChange={(e) => setSearch(e.target.value)}
-                                        className="px-8 py-2 border-2 border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 w-sm"
+                                        className="w-full md:w-[250px] px-8 py-2 border-2 border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                                     />
                                 </div>
                             )}
 
+                            {/* Remarks Filter */}
                             {filterType === "remarks" && (
-                                <div className="flex gap-2 z-50">
-                                    <div className="relative">
+                                <div className="flex flex-col md:flex-row gap-2 z-20 w-full md:w-auto">
+                                    <div className="relative w-full md:w-[200px]">
                                         <span className="absolute -top-2 left-2 bg-white px-2 text-xs text-gray-600">
                                             Remarks
                                         </span>
                                         <div
                                             onClick={() => setShowRemarksDropdown(!showRemarksDropdown)}
-                                            className="px-3 py-2 border-2 border-gray-400 rounded-md w-[200px] text-gray-700 cursor-pointer bg-white hover:border-green-500 transition flex items-center justify-between"
+                                            className="w-full px-3 py-2 border-2 border-gray-400 rounded-md text-gray-700 cursor-pointer bg-white hover:border-green-500 transition flex items-center justify-between"
                                         >
                                             <span>{search || "Select Remarks"}</span>
                                             <ChevronDown
@@ -316,8 +369,8 @@ const TechSchedule = () => {
                                         </div>
 
                                         {showRemarksDropdown && (
-                                            <div className="absolute mt-1 w-[200px] bg-white border border-gray-200 rounded-sm shadow-md z-20 animate-fadeIn">
-                                                {["Confirmed", "Completed", "Declined"].map((opt) => (
+                                            <div className="absolute mt-1 w-full bg-white border border-gray-200 rounded-sm shadow-md z-20 animate-fadeIn">
+                                                {["Pending", "Confirmed", "Completed", "Declined"].map((opt) => (
                                                     <div
                                                         key={opt}
                                                         onClick={() => {
@@ -334,8 +387,8 @@ const TechSchedule = () => {
                                     </div>
 
                                     {/* Date Range for Remarks */}
-                                    <div className="relative flex items-center gap-2">
-                                        <div className="relative flex items-center">
+                                    <div className="flex flex-col sm:flex-row gap-2">
+                                        <div className="relative flex items-center flex-1 md:flex-initial">
                                             <span className="absolute left-3 text-gray-400 pointer-events-none">
                                                 <Calendar className="w-5 h-5" />
                                             </span>
@@ -346,12 +399,12 @@ const TechSchedule = () => {
                                                 startDate={startDate}
                                                 endDate={endDate}
                                                 placeholderText="From date"
-                                                className="pl-10 pr-3 py-2 border-2 w-[200px] border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                className="w-full md:w-[200px] pl-10 pr-3 py-2 border-2 border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                                                 dateFormat="MMMM d, yyyy"
                                             />
                                         </div>
 
-                                        <div className="relative flex items-center">
+                                        <div className="relative flex items-center flex-1 md:flex-initial">
                                             <span className="absolute left-3 text-gray-400 pointer-events-none">
                                                 <Calendar className="w-5 h-5" />
                                             </span>
@@ -363,7 +416,7 @@ const TechSchedule = () => {
                                                 endDate={endDate}
                                                 minDate={startDate}
                                                 placeholderText="To date"
-                                                className="pl-10 pr-3 py-2 border-2 w-[200px] border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                className="w-full md:w-[200px] pl-10 pr-3 py-2 border-2 border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                                                 dateFormat="MMMM d, yyyy"
                                             />
                                         </div>
@@ -371,26 +424,27 @@ const TechSchedule = () => {
                                 </div>
                             )}
 
+                            {/* Service Type Filter */}
                             {filterType === "serviceType" && (
-                                <div className="flex gap-2 z-50">
-                                    <div className="relative">
+                                <div className="flex flex-col md:flex-row gap-2 z-20 w-full md:w-auto">
+                                    <div className="relative w-full md:w-[300px]">
                                         <span className="absolute -top-2 left-2 bg-white px-2 text-xs text-gray-600">
                                             Service Type
                                         </span>
                                         <div
                                             onClick={() => setShowServiceDropdown(!showServiceDropdown)}
-                                            className="px-3 py-2 border-2 border-gray-400 rounded-md w-[300px] text-gray-700 cursor-pointer bg-white hover:border-green-500 transition flex items-center justify-between"
+                                            className="w-full px-3 py-2 border-2 border-gray-400 rounded-md text-gray-700 cursor-pointer bg-white hover:border-green-500 transition flex items-center justify-between"
                                         >
-                                            <span>{search || "Select Service Type"}</span>
+                                            <span className="truncate">{search || "Select Service Type"}</span>
                                             <ChevronDown
-                                                className={`w-4 h-4 text-gray-900 transform transition-transform duration-200 ${
+                                                className={`w-4 h-4 text-gray-900 transform transition-transform duration-200 flex-shrink-0 ml-2 ${
                                                     showServiceDropdown ? "rotate-180" : ""
                                                 }`}
                                             />
                                         </div>
 
                                         {showServiceDropdown && (
-                                            <div className="absolute mt-1 w-[300px] bg-white border border-gray-200 rounded-sm shadow-md z-20 animate-fadeIn">
+                                            <div className="absolute mt-1 w-full bg-white border border-gray-200 rounded-sm shadow-md z-20 animate-fadeIn max-h-60 overflow-y-auto">
                                                 {serviceTypes.map((service) => (
                                                     <div
                                                         key={service._id}
@@ -408,8 +462,8 @@ const TechSchedule = () => {
                                     </div>
 
                                     {/* Date Range for Service Type */}
-                                    <div className="relative flex items-center gap-2">
-                                        <div className="relative flex items-center">
+                                    <div className="flex flex-col sm:flex-row gap-2">
+                                        <div className="relative flex items-center flex-1 md:flex-initial">
                                             <span className="absolute left-3 text-gray-400 pointer-events-none">
                                                 <Calendar className="w-5 h-5" />
                                             </span>
@@ -420,12 +474,12 @@ const TechSchedule = () => {
                                                 startDate={startDate}
                                                 endDate={endDate}
                                                 placeholderText="From date"
-                                                className="pl-10 pr-3 py-2 border-2 w-[200px] border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                className="w-full md:w-[200px] pl-10 pr-3 py-2 border-2 border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                                                 dateFormat="MMMM d, yyyy"
                                             />
                                         </div>
 
-                                        <div className="relative flex items-center">
+                                        <div className="relative flex items-center flex-1 md:flex-initial">
                                             <span className="absolute left-3 text-gray-400 pointer-events-none">
                                                 <Calendar className="w-5 h-5" />
                                             </span>
@@ -437,7 +491,7 @@ const TechSchedule = () => {
                                                 endDate={endDate}
                                                 minDate={startDate}
                                                 placeholderText="To date"
-                                                className="pl-10 pr-3 py-2 border-2 w-[200px] border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                className="w-full md:w-[200px] pl-10 pr-3 py-2 border-2 border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                                                 dateFormat="MMMM d, yyyy"
                                             />
                                         </div>
@@ -445,9 +499,10 @@ const TechSchedule = () => {
                                 </div>
                             )}
 
+                            {/* Date Filter */}
                             {filterType === "date" && (
-                                <div className="relative flex items-center gap-3">
-                                    <div className="relative flex items-center">
+                                <div className="flex flex-col sm:flex-row gap-2 z-20">
+                                    <div className="relative flex items-center flex-1">
                                         <span className="absolute left-3 text-gray-400 pointer-events-none">
                                             <Calendar className="w-5 h-5" />
                                         </span>
@@ -458,12 +513,12 @@ const TechSchedule = () => {
                                             startDate={startDate}
                                             endDate={endDate}
                                             placeholderText="From date"
-                                            className="pl-10 pr-3 py-2 border-2 w-[200px] border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                            className="w-full pl-10 pr-3 py-2 border-2 border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                                             dateFormat="MMMM d, yyyy"
                                         />
                                     </div>
 
-                                    <div className="relative flex items-center">
+                                    <div className="relative flex items-center flex-1">
                                         <span className="absolute left-3 text-gray-400 pointer-events-none">
                                             <Calendar className="w-5 h-5" />
                                         </span>
@@ -475,14 +530,14 @@ const TechSchedule = () => {
                                             endDate={endDate}
                                             minDate={startDate}
                                             placeholderText="To date"
-                                            className="pl-10 pr-3 py-2 border-2 w-[200px] border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                            className="w-full pl-10 pr-3 py-2 border-2 border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                                             dateFormat="MMMM d, yyyy"
                                         />
                                     </div>
                                 </div>  
                             )}
 
-
+                            {/* Search Button */}
                             {(filterType === "name" ||
                                 filterType === "all" ||
                                 filterType === "remarks" ||
@@ -490,7 +545,7 @@ const TechSchedule = () => {
                                 filterType === "date") && (
                                 <button
                                     onClick={handleSearch}
-                                    className="px-5 py-2 bg-green-600 text-white rounded-sm cursor-pointer hover:bg-green-700 focus:ring-2 focus:ring-green-400 flex justify-center items-center gap-1 ease-in-out duration-300"
+                                    className="w-full px-5 py-2 bg-green-600 text-white rounded-sm cursor-pointer hover:bg-green-700 focus:ring-2 focus:ring-green-400 flex justify-center items-center gap-1 ease-in-out duration-300"
                                 >
                                     <Search className="w-4 h-4" />
                                     Search
@@ -502,25 +557,31 @@ const TechSchedule = () => {
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50 sticky top-0 z-10">
                                     <tr>
-                                        <th className="px-6 py-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th className="px-4 sm:px-6 py-4 sm:py-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                             Booking Id
                                         </th>
-                                        <th className="px-6 py-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th className="px-4 sm:px-6 py-4 sm:py-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                                            Customer Id
+                                        </th>
+                                        <th className="px-4 sm:px-6 py-4 sm:py-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                             Customer Name
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th className="px-4 sm:px-6 py-4 sm:py-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Service Type
                                         </th>
-                                        <th className="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th className="px-4 sm:px-6 py-4 sm:py-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Amount
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th className="px-4 sm:px-6 py-4 sm:py-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Official Reciept
+                                        </th>
+                                        <th className="px-4 sm:px-6 py-4 sm:py-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Service Date
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th className="px-4 sm:px-6 py-4 sm:py-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Time
                                         </th>
-                                        <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th className="px-2 sm:px-4 py-4 sm:py-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Remarks
                                         </th>
                                     </tr>
@@ -537,60 +598,96 @@ const TechSchedule = () => {
                                                     <h3 className="text-lg font-medium text-gray-900 mb-2">
                                                         No bookings yet
                                                     </h3>
-                                                    <p className="text-gray-500">Bookings will appear here once a customer submits a request.</p>
+                                                    <p className="text-gray-500">
+                                                        Bookings will appear here once a customer submits a request.
+                                                    </p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ) : filteredBookings.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="8" className="text-center py-16">
+                                                <div className="flex flex-col items-center">
+                                                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                                        <FileWarning className="w-8 h-8 text-gray-400" />
+                                                    </div>
+                                                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                                                        No records found!
+                                                    </h3>
+                                                    <p className="text-gray-500">
+                                                        Try adjusting your search keywords.
+                                                    </p>
                                                 </div>
                                             </td>
                                         </tr>
                                     ) : (
                                         filteredBookings.map((booking) => (
                                             <tr key={booking._id}
-                                                className={`hover:bg-gray-100 ease-in-out duration-300 cursor-pointer ${
+                                            className={`hover:bg-gray-100 ease-in-out duration-300 cursor-pointer ${
                                                 selectedBooking?._id === booking._id ? "!bg-green-100" : ""
-                                                }`}
-                                                onDoubleClick={() => {
-                                                    setSelectedBooking(booking);
-                                                    setShowModal(true);
-                                                }}>
-                                                <td className="px-5 py-4 text-sm text-gray-800 font-mono font-medium">
+                                            }`}
+                                            onDoubleClick={() => {
+                                                setSelectedBooking(booking);
+                                                setShowModal(true);
+                                            }}>
+                                                <td className="px-4 sm:px-5 py-4 sm:py-4 text-sm text-gray-800 font-mono font-medium">
                                                     BOOK{booking._id.slice(-4).toUpperCase()}
                                                 </td>
-                                                <td className="px-6 py-4 text-sm text-gray-900">
+                                                <td className="px-4 sm:px-5 py-4 sm:py-4 text-sm text-gray-800 font-mono font-medium">
+                                                    CUST{booking.customerId._id.slice(-4).toUpperCase()}
+                                                </td>
+                                                <td className="px-4 sm:px-6 py-4 text-sm text-gray-900">
                                                     {booking.customerId?.fullname}
                                                 </td>
-                                                <td className="px-6 py-6 text-sm text-gray-900">
-                                                    {booking.serviceType?.name}
+                                                <td className="px-4 sm:px-6 py-4 text-sm text-gray-900">
+                                                    <div className="space-y-1 max-w-[200px] sm:max-w-none">
+                                                    <div className="truncate">{booking.serviceType?.name}</div>
+                                                        {booking.serviceChangeLogs?.length > 0 && (
+                                                            <div className="text-xs text-gray-500 italic">
+                                                                {`${booking.serviceChangeLogs[booking.serviceChangeLogs.length - 1].from} changed to ${booking.serviceChangeLogs[booking.serviceChangeLogs.length - 1].to} on ${new Date(booking.serviceChangeLogs[booking.serviceChangeLogs.length - 1].changedAt).toLocaleString()}`}
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </td>
-                                                <td className="py-6 text-sm text-gray-900">
+
+
+                                                <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                                                     {formatCurrency(booking.price)}
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {formatDate(booking.date)}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {booking.time}
-                                                </td>
-                                                <td className="px-2 py-4">
-                                                    {booking.status === "pending" && (
-                                                        <div className="flex gap-2">
-                                                        {/* ✅ ACCEPT BUTTON */}
-                                                        <button
-                                                            className="px-3 py-1 bg-green-600 text-white rounded-sm text-sm hover:bg-green-700 cursor-pointer"
-                                                            onClick={() => setActionToConfirm({ booking, action: "accept" })}
-                                                        >
-                                                            Accept
-                                                        </button>
-
-                                                        {/* ✅ DECLINE BUTTON (already fine) */}
-                                                        <button
-                                                            className="px-3 py-1 bg-red-600 text-white rounded-sm text-sm hover:bg-red-700 cursor-pointer"
+                                                <td className="px-4 sm:px-6 py-4 text-sm">
+                                                    {booking.status === "completed" ? (
+                                                        <span
+                                                            className="text-blue-600 font-semibold underline cursor-pointer"
                                                             onClick={() => {
-                                                            setSelectedBooking(booking);
-                                                            setShowDeclineModal(true);
+                                                                setSelectedBooking(booking);
+                                                                setShowReciept(true);
                                                             }}
                                                         >
-                                                            Decline
-                                                        </button>
-                                                        </div>
+                                                            OR
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-gray-400">—</span>  // or leave blank
+                                                    )}
+                                                </td>
+
+
+                                                <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {shortFormatDate(booking.date)}
+                                                </td>
+                                                <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {booking.time}
+                                                </td>
+                                                <td className="px-2 sm:px-4 py-4">
+                                                    {booking.status === "pending" && (
+                                                        <span
+                                                            className="text-blue-600 underline cursor-pointer font-medium"
+                                                            onClick={() => {
+                                                                setSelectedBooking(booking);
+                                                                setShowPendingModal(true);
+                                                            }}
+                                                        >
+                                                            Pending
+                                                        </span>
                                                     )}
 
                                                     {booking.status === "confirmed" && (
@@ -598,16 +695,16 @@ const TechSchedule = () => {
                                                     )}
 
                                                     {booking.status === "completed" && (
-                                                        <span className="text-sm text-green-700 font-medium italic">Completed</span>
+                                                        <span className="text-sm text-green-700 font-medium">Completed</span>
                                                     )}
 
                                                     {booking.status === "declined" && (
-                                                        <span className="text-sm text-red-600 font-medium italic">Declined</span>
+                                                        <span className="text-sm text-red-600 font-medium">Declined</span>
                                                     )}
 
                                                     {booking.status === "cancelled" && (
                                                         <span className={`capitalize ${getStatusBadge(booking.status)}`}>
-                                                        Cancelled
+                                                            Cancelled
                                                         </span>
                                                     )}
                                                 </td>
@@ -619,7 +716,247 @@ const TechSchedule = () => {
                         </div>  
                     </div>
                 </div>
-            
+                                    
+                {showPendingModal && selectedBooking && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2">
+                        <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-fade-in">
+                        {/* Header */}
+                        <div className="px-6 py-4 border-b border-gray-200">
+                            <h2 className="text-xl font-semibold text-gray-900">Manage Booking</h2>
+                        </div>
+
+                        {/* Content */}
+                        <div className="px-6 py-5">
+                            <p className="text-gray-600 text-sm leading-relaxed">
+                            Choose an action for this booking. You can accept it, decline with a reason, or propose a different service.
+                            </p>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="px-6 pb-6 space-y-2">
+                            <button
+                            className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md transition-colors duration-200 flex items-center justify-center gap-2"
+                            onClick={() => {
+                                setActionToConfirm({ booking: selectedBooking, action: "accept" });
+                                setShowPendingModal(false);
+                            }}
+                            >
+                            
+                            Accept Booking
+                            </button>
+
+                            <button
+                            className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors duration-200 flex items-center justify-center gap-2"
+                            onClick={() => {
+                                setShowChangeServiceModal(true);
+                                setShowPendingModal(false);
+                            }}
+                            >
+                         
+                            Change Service
+                            </button>
+
+                            <button
+                            className="w-full px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md transition-colors duration-200 flex items-center justify-center gap-2"
+                            onClick={() => {
+                                setShowDeclineModal(true);
+                                setShowPendingModal(false);
+                            }}
+                            >
+                          
+                            Decline Booking
+                            </button>
+
+                            <button
+                            className="w-full px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-md transition-colors duration-200 mt-2"
+                            onClick={() => {
+                                setShowPendingModal(false)
+                                setSelectedBooking(null)
+                            }}
+                            >
+                            Cancel
+                            </button>
+                        </div>
+                        </div>
+                    </div>
+                )}
+
+                {showChangeServiceModal && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2">
+                        <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+                            {/* Header */}
+                            <div className="px-6 py-4 border-b border-gray-200">
+                                <h2 className="text-xl font-semibold text-gray-900">Change Service</h2>
+                            </div>
+
+                            {/* Content */}
+                            <div className="px-6 py-5 space-y-4">
+                                <p className="text-gray-600 text-sm leading-relaxed">
+                                    Select a new service type and tank size (if applicable) for this booking.
+                                </p>
+
+                                {/* Service Type Select */}
+                                <div className="relative w-full">
+                                    <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
+                                        Service Type <span className="text-red-500 ml-1">*</span>
+                                    </label>
+                                    <div
+                                        className="w-full border-2 border-gray-200 rounded-lg py-3 px-4 cursor-pointer relative"
+                                        onClick={() => setShowServiceTypeModal(true)}>
+                                        {selectedBooking.serviceDetails?.name || "Select a service..."}
+                                    </div>
+                                </div>
+
+                                {/* Tank Size Select */}
+                                {selectedBooking.serviceDetails?.hasTankSize && (
+                                    <div className="relative w-full">
+                                        <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
+                                            Tank Size <span className="text-red-500 ml-1">*</span>
+                                        </label>
+                                        <div
+                                            className="w-full border-2 border-gray-200 rounded-lg py-3 px-4 cursor-pointer relative"
+                                            onClick={() => setShowTankSizeModal(true)}>
+                                            {selectedTankSize || "Select Tank Size..."}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            {/* Price + Duration (only if service has no tank size) */}
+                            {selectedBooking.serviceDetails && !selectedBooking.serviceDetails.hasTankSize && (
+                                <div className="px-6 pb-2">
+                                    <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
+                                        <p className="text-gray-700 font-semibold">
+                                            Price: ₱{selectedBooking.serviceDetails.fixedPrice}
+                                        </p>
+                                        <p className="text-gray-600 text-sm">
+                                            Duration: {formatHours(selectedBooking.serviceDetails.fixedDuration)}
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+
+
+                            {/* Actions */}
+                            <div className="px-6 pb-6 space-y-2">
+                                <button
+                                    className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md transition-colors duration-200"
+                                    onClick={handleUpdateServiceType}
+                                >
+                                    Confirm Change
+                                </button>
+
+
+                                <button
+                                    className="w-full px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-md transition-colors duration-200"
+                                    onClick={() => setShowChangeServiceModal(false)}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {showServiceTypeModal && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 animate-in fade-in duration-200">
+                        <div className="bg-white rounded-md w-full max-w-md shadow-2xl transform transition-all">
+                            {/* Header */}
+                            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+                                <div>
+                                    <h3 className="text-xl font-bold text-gray-900">Select Service Type</h3>
+                                </div>
+                                <button
+                                    onClick={() => setShowServiceTypeModal(false)}
+                                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            {/* List */}
+                            <div className="p-4 max-h-96 overflow-y-auto">
+                                <div className="space-y-2">
+                                    {serviceTypes.map((service) => (
+                                        <button
+                                            key={service._id}
+                                            onClick={() => {
+                                                setSelectedBooking({ 
+                                                    ...selectedBooking, 
+                                                    newServiceType: service._id, 
+                                                    serviceDetails: service 
+                                                });
+                                                setSelectedTankSize("");
+                                                setShowServiceTypeModal(false);
+                                            }}
+                                            className="w-full group px-4 py-3.5 bg-white border-2 border-gray-100 rounded-md hover:border-blue-500 hover:bg-blue-50 transition-all text-left font-medium text-gray-700 hover:text-blue-700 hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <span>{service.name}</span>
+                                                <svg className="w-5 h-5 text-gray-300 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                </svg>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Tank Size Modal */}
+                {showTankSizeModal && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 animate-in fade-in duration-200">
+                        <div className="bg-white rounded-md w-full max-w-md shadow-2xl transform transition-all">
+                            {/* Header */}
+                            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+                                <div>
+                                    <h3 className="text-xl font-bold text-gray-900">Select Tank Size</h3>
+                                </div>
+                                <button
+                                    onClick={() => setShowTankSizeModal(false)}
+                                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            {/* List */}
+                            <div className="p-4 max-h-96 overflow-y-auto">
+                                <div className="space-y-2">
+                                    {Object.entries(selectedBooking.serviceDetails.tankOptions).map(([size, option]) => (
+                                        <button
+                                            key={size}
+                                            onClick={() => {
+                                                setSelectedTankSize(size);
+                                                setShowTankSizeModal(false);
+                                            }}
+                                            className="w-full group px-4 py-3.5 bg-white border-2 border-gray-100 rounded-md hover:border-green-500 hover:bg-green-50 transition-all text-left font-medium text-gray-700 hover:text-green-700 hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
+                                        >
+                                            <div className="flex flex-col">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="font-semibold">{size.charAt(0).toUpperCase() + size.slice(1)}</span>
+                                                    <svg className="w-5 h-5 text-gray-300 group-hover:text-green-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                    </svg>
+                                                </div>
+                                                <span className="text-sm text-gray-500 mt-1">
+                                                    ₱{option.price} - {formatHours(option.duration)} - {option.capacity}L
+                                                </span>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {actionToConfirm && (
                     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4"
                         onClick={(e) => {
@@ -649,40 +986,53 @@ const TechSchedule = () => {
                             </p>
 
                             <div className="flex justify-end gap-2">
-                                <button className="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer ease-in-out duration-300"
-                                onClick={() => setActionToConfirm(null)}>
-                                    Cancel
-                                </button>
 
-                                <button className={`px-4 py-2 rounded text-white cursor-pointer ease-in-out duration-300 ${
-                                    actionToConfirm.action === "decline"
-                                    ? "bg-red-500 hover:bg-red-600"
-                                    : "bg-green-500 hover:bg-green-600"
-                                }`}
-                                onClick={async () => {
-                                    if(actionToConfirm.action === "complete"){
+                                <button
+                                    className={`px-4 py-2 rounded text-white cursor-pointer ease-in-out duration-300 ${
+                                        actionToConfirm.action === "decline"
+                                        ? "bg-red-500 hover:bg-red-600"
+                                        : "bg-green-500 hover:bg-green-600"
+                                    }`}
+                                    onClick={async () => {
+                                        if (actionToConfirm.action === "complete") {
                                         setSelectedBooking(actionToConfirm.selectedBooking);
                                         setShowProofModal(true);
-                                    } 
-                                    else{
+                                        } else {
                                         await handleRespond(
                                             actionToConfirm.booking._id,
                                             actionToConfirm.action
                                         );
-                                    }
-                                    setActionToConfirm(null);
-                                }}>
-                                Confirm
+                                        }
+                                        setActionToConfirm(null);
+                                    }}
+                                    >
+                                    {actionToConfirm.action === "accept"
+                                        ? "Yes"
+                                        : actionToConfirm.action === "complete"
+                                        ? "Complete"
+                                        : "Confirm"}
+                                    </button>
+                                <button
+                                    className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                                    onClick={() => {
+                                        // Close confirm modal
+                                        setActionToConfirm(null);
+
+                                        // Re-open the pending modal
+                                        setShowPendingModal(true);
+                                    }}
+                                >
+                                    No
                                 </button>
+
                             </div>
                         </div>
                     </div>
                 )}
 
-
                 {showDeclineModal && selectedBooking && (
-                    <div className="fixed inset-0 flex items-center justify-center bg-black/30 z-50 p-4">
-                        <div className="bg-white rounded-sm shadow-2xl w-full max-w-2xl animate-fade-in mx-auto flex flex-col max-h-[90vh] overflow-hidden">
+                    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+                        <div className="bg-white rounded-none md:rounded-sm shadow-2xl w-full md:max-w-3xl animate-fade-in flex flex-col h-screen md:max-h-[90vh] overflow-y-auto">
                             <div className="bg-orange-500 px-6 py-4 flex-shrink-0">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center space-x-3">
@@ -746,13 +1096,10 @@ const TechSchedule = () => {
                                     {/* ADDITIONAL DETAILS — only show if "Other Reason" */}
                                     {selectedDeclineReason === "Other Reason" && (
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Additional Details
-                                            </label>
                                             <textarea
                                                 value={declineReason}
                                                 onChange={(e) => setDeclineReason(e.target.value)}
-                                                placeholder="Provide more details about the reason for declining..."
+                                                placeholder="Provide details about the reason for declining"
                                                 className="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-orange-500 outline-none text-sm resize-none"
                                                 rows="4"
                                             ></textarea>
@@ -766,21 +1113,20 @@ const TechSchedule = () => {
 
                             {/* FOOTER */}
                             <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex-shrink-0">
-                                <div className="flex justify-between items-center">
-                                    <div className="text-xs text-gray-500">
-                                        This action cannot be undone
-                                    </div>
+                                <div className="flex justify-end items-center">
                                     <div className="flex space-x-2">
                                         <button
                                             type="button"
                                             onClick={() => {
                                                 setShowDeclineModal(false);
+                                                setActionToConfirm(null);
+                                                setShowPendingModal(true);
                                                 setDeclineReason("");
                                                 setSelectedDeclineReason("");
                                             }}
                                             className="px-6 py-2 border-2 border-gray-400 text-gray-700 rounded-sm hover:border-gray-500 transition cursor-pointer text-sm"
                                         >
-                                            Keep Booking
+                                            Cancel
                                         </button>
                                         <button
                                             type="button"
@@ -812,15 +1158,16 @@ const TechSchedule = () => {
                 )}
 
                 {showProofModal && (
-                    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
+                    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
                         <div className="bg-white rounded-sm shadow-2xl w-full max-w-xl animate-fade-in mx-auto flex flex-col max-h-[90vh] overflow-hidden">
+                            
+                            {/* Header */}
                             <div className="bg-green-600 px-6 py-4 flex-shrink-0">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center space-x-3">
                                         <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
                                             <FileText className="w-4 h-4 text-white" />
                                         </div>
-
                                         <div>
                                             <h3 className="text-lg font-semibold text-white">Upload Service Proof</h3>
                                             <p className="text-sm text-gray-300">Provide completion evidence</p>
@@ -833,133 +1180,113 @@ const TechSchedule = () => {
                                     >
                                         <X className="w-5 h-5" />
                                     </button>
-
                                 </div>
                             </div>
 
-                            <div className="px-6 py-6 overflow-y-auto flex-1">
-                                
+                            {/* Body */}
+                            <div className="px-6 py-6 overflow-y-auto flex-1 space-y-6">
+                                <div>   
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                        Customer Name <span className="text-red-500"></span>
+                                    </label>
+                                    <div>
+                                        <h2 className='text-lg font-semibold'>Junneil Baroro</h2>
+                                    </div>
+                                </div>
+                                {/* OR Number Input */}
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                        OR Number <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={orNumber}
+                                        onChange={(e) => setOrNumber(e.target.value)}
+                                        placeholder="Enter Official Receipt number"
+                                        className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    />
+                                </div>
 
-                                <div className="mb-6">
+                                {/* Single Image Upload */}
+                                <div>
                                     <div className="flex items-center mb-4">
                                         <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                                        <h4 className="text-sm font-semibold text-gray-700 uppercase">Select Images</h4>
+                                        <h4 className="text-sm font-semibold text-gray-700 uppercase">Select Image</h4>
                                     </div>
-                                    
-                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors relative">
-                                    <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+
+                                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors relative">
+                                        <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                                             <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                                             </svg>
                                         </div>
-
-                                        <p className="text-gray-600 mb-2">Click to select images or drag and drop</p>
-                                        <p className="text-sm text-gray-500">Multiple files supported</p>
+                                        <p className="text-gray-600 mb-2">Click to select image or drag and drop</p>
+                                        <p className="text-sm text-gray-500">Only one file allowed</p>
 
                                         <input
                                             type="file"
-                                            multiple
                                             accept="image/*"
                                             onChange={(e) => {
-                                        if (e.target.files) {
-                                            const newFiles = Array.from(e.target.files);
-                                            setProofFiles((prev) => {
-                                            const existingNames = prev.map((f) => f.name);
-                                            const filtered = newFiles.filter((f) => !existingNames.includes(f.name));
-                                            return [...prev, ...filtered];
-                                            });
-                                        }
-                                        }}
-
+                                                if (e.target.files && e.target.files[0]) {
+                                                    setProofFiles([e.target.files[0]]); // overwrite with only one file
+                                                }
+                                            }}
                                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                         />
-                                        </div>
-
+                                    </div>
                                 </div>
 
-                                {proofFiles && proofFiles.length > 0 && (
-                                    <div className="mb-6">
+                                {/* Selected Image Preview */}
+                                {proofFiles.length > 0 && (
+                                    <div>
                                         <div className="flex items-center mb-4">
                                             <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                                            <h4 className="text-sm font-semibold text-gray-700 uppercase">Selected Images ({proofFiles.length}/5)</h4>
+                                            <h4 className="text-sm font-semibold text-gray-700 uppercase">
+                                                Selected Image
+                                            </h4>
                                         </div>
-                                        
-                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                            {proofFiles.map((file, index) => (
-                                                <div key={index} className="relative group">
-                                                    <div className="aspect-square rounded-lg overflow-hidden border-2 border-gray-200 bg-gray-50">
-                                                        <img
-                                                            src={URL.createObjectURL(file)}
-                                                            alt={`Preview ${index + 1}`}
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                    </div>
-                                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg"></div>
-                                                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            const newFiles = proofFiles.filter((_, i) => i !== index);
-                                                            setProofFiles(newFiles);
-                                                        }}
-                                                        className="w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg cursor-pointer"
-                                                    >
-                                                        <X className="w-3 h-3" />
-                                                    </button>
-
-                                                    </div>
-                                                    <div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
-                                                        {(file.size / 1024 / 1024).toFixed(1)}MB
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Upload Status */}
-                                {proofFiles && proofFiles.length > 0 && (
-                                    <div className="border border-green-200 rounded-lg p-4">
-                                        <div className="flex items-center space-x-3">
-                                            <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center">
-                                                <CheckCircle className="w-3 h-3 text-yellow-500" />
+                                        <div className="relative w-48 aspect-square rounded-lg overflow-hidden border-2 border-gray-200 bg-gray-50">
+                                            <img
+                                                src={URL.createObjectURL(proofFiles[0])}
+                                                alt="Preview"
+                                                className="w-full h-full object-cover"
+                                            />
+                                            <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors rounded-lg"></div>
+                                            <div className="absolute top-2 right-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setProofFiles([])}
+                                                    className="w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg cursor-pointer"
+                                                >
+                                                    <X className="w-3 h-3" />
+                                                </button>
                                             </div>
-
-                                            <p className="text-sm text-green-700">
-                                                Ready to upload {proofFiles.length} image{proofFiles.length !== 1 ? 's' : ''} as service completion proof
-                                            </p>
+                                            <div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                                                {(proofFiles[0].size / 1024 / 1024).toFixed(1)}MB
+                                            </div>
                                         </div>
                                     </div>
                                 )}
                             </div>
 
+                            {/* Footer */}
                             <div className="bg-gray-50 px-4 py-4 border-t border-gray-200 flex-shrink-0">
-                                <div className="flex justify-between items-center gap-4">
-                                    <div className="text-xs text-gray-500">
-                                        Upload proof images to complete service
-                                    </div>
-                                    <div className="flex space-x-2 whitespace-nowrap">
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowProofModal(false)}
-                                            className="px-4 py-2.5 border-2 border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all duration-200 font-medium cursor-pointer text-sm"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={handleProofUpload}
-                                            disabled={!proofFiles || proofFiles.length === 0}
-                                            className="px-4 py-2.5 bg-green-600 text-white rounded-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 font-medium shadow-lg hover:shadow-xl cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                                </svg>
-                                                Upload & Complete
-                                            </div>
-                                        </button>
-                                    </div>
+                                <div className="flex justify-end items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowProofModal(false)}
+                                        className="px-4 py-2.5 border-2 border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all duration-200 font-medium cursor-pointer text-sm"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleProofUpload}
+                                        disabled={!proofFiles.length || !orNumber}
+                                        className="px-4 py-2.5 bg-green-600 text-white rounded-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 font-medium shadow-lg hover:shadow-xl cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                                    >
+                                        Submit
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -967,8 +1294,9 @@ const TechSchedule = () => {
                 )}
 
                 {showModal && selectedBooking && (
-                    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-                        <div className="bg-white rounded-sm shadow-2xl w-full max-w-3xl animate-fade-in flex flex-col max-h-[90vh] overflow-hidden">
+                    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+                        <div className="bg-white rounded-none md:rounded-sm shadow-2xl w-full md:max-w-3xl animate-fade-in flex flex-col h-screen md:max-h-[90vh] overflow-y-auto">
+
                             <div className="bg-green-600 px-6 py-4 flex-shrink-0">
                                 <div className="flex items-center space-x-3">
                                     <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
@@ -997,6 +1325,15 @@ const TechSchedule = () => {
 
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                         <div>
+                                            <label className="text-xs font-semibold text-gray-500 mb-1 block">Customer ID</label>
+                                            <div className="flex items-center space-x-2">
+                                                <User className="w-4 h-4 text-gray-500" />
+                                                <p className="text-sm font-medium text-gray-900 font-mono">
+                                                    CUST{selectedBooking.customerId._id.slice(-4).toUpperCase()}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div>
                                             <label className="text-xs font-semibold text-gray-500 mb-1 block">Customer Name</label>
                                             <div className="flex items-center space-x-2">
                                                 <User className="w-4 h-4 text-gray-500" />
@@ -1013,12 +1350,6 @@ const TechSchedule = () => {
                                                     {selectedBooking.customerId?.phone}
                                                 </p>
                                             </div>
-                                        </div>
-                                        <div>
-                                            <label className="text-xs font-semibold text-gray-500 mb-1 block">Service Amount</label>
-                                            <p className="text-sm font-bold text-green-600">
-                                                {formatCurrency(selectedBooking.price)}
-                                            </p>
                                         </div>
                                         <div className="md:col-span-2">
                                             <label className="text-xs font-semibold text-gray-500 mb-1 block">Service Address</label>
@@ -1080,18 +1411,6 @@ const TechSchedule = () => {
                                                 </p>
                                             </div>
                                         </div>
-
-                                        {selectedBooking.tankSize && (
-                                            <div className='col-span-2'>
-                                                <label className="text-xs font-semibold text-gray-500 mb-1 block">Tank Specifications</label>
-                                                <div className="flex items-center space-x-2">
-                                                    <Package className="w-4 h-4 text-gray-500" />
-                                                    <p className="text-sm font-medium text-gray-900 capitalize">
-                                                        {selectedBooking.tankSize} ({selectedBooking.capacity} Liters)
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        )}
                                     </div>
                                 </div>  
                                 {selectedBooking.notes && (
@@ -1126,16 +1445,6 @@ const TechSchedule = () => {
                                 <div className="flex justify-end md:justify-between items-center gap-10">
                                     <span className="text-xs text-gray-500 hidden md:block">Complete booking information and service details</span>
                                     <div className='flex justify-center gap-2 whitespace-nowrap'>
-                                        <button
-                                            disabled={!isBookingSelected}
-                                            className='flex items-center gap-2 px-5 py-2 rounded-sm bg-green-500 hover:bg-green-600 text-white ease-in-out duration-300 shadow-sm hover:shadow-md font-medium text-sm cursor-pointer'
-                                            onClick={() => {
-                                                setShowMapModal(true)
-                                                setShowModal(false)
-                                            }}>
-                                            <MapPin className="w-4 h-4" />
-                                            View Map
-                                        </button>
                                         {selectedBooking.status === 'confirmed' && !isFutureDate(selectedBooking.date) && (
                                             <button
                                                 type="button"
@@ -1151,7 +1460,10 @@ const TechSchedule = () => {
 
                                         <button
                                             type="button"
-                                            onClick={() => setShowModal(false)}
+                                            onClick={() => {
+                                                setShowModal(false)
+                                                setSelectedBooking(null)
+                                            }}
                                             className="px-6 py-2 border-2 border-gray-400 text-gray-700 rounded-sm hover:border-gray-500 transition cursor-pointer text-sm">
                                             Close
                                         </button>
@@ -1162,45 +1474,196 @@ const TechSchedule = () => {
                     </div>
                 )}
 
-                {showMapModal && selectedBooking && (
-                    <div className="fixed inset-0 bg-black/30 flex justify-center items-center z-50 p-4"
-                        onClick={(e) => {
-                            if(e.target === e.currentTarget) setShowMapModal(false);
-                        }}>
-                        <div className="bg-white rounded-sm shadow-xl w-full max-w-5xl animate-fade-in relative">
-                            <div className="bg-green-600 px-6 py-4 rounded-sm">
-                                <div className="flex justify-between items-center">
-                                    <div className='flex gap-2 justify-center items-center'>
-                                        <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-                                            <MapPin className="w-4 h-4 text-white" />
-                                        </div>
-                                        <h2 className="text-xl font-semibold text-white">Customer Location</h2>
+                {showReciept && selectedBooking && (
+                    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+                        <div className="bg-white shadow-2xl rounded-sm w-full max-w-full md:max-w-xl animate-fade-in flex flex-col max-h-[90vh] md:h-auto overflow-hidden">
+                            <div className="bg-white px-8 py-6 border-b-2 border-dashed border-gray-300 flex-shrink-0">
+                                <div className="text-center mb-4">
+                                    <div className="flex justify-center mb-3">
+                                        <img 
+                                            className="h-20 w-auto object-contain" 
+                                            src={logo} 
+                                            alt="RMG Logo" 
+                                        />
                                     </div>
-                                    <button
-                                        onClick={() => setShowMapModal(false)}
-                                        className="text-gray-200 hover:text-gray-100 hover:bg-green-500 ease-in-out duration-300 rounded-full p-2 cursor-pointer">
-                                        <X className="w-5 h-5" />
-                                    </button>
+                                    <div className="inline-flex items-center justify-center mb-3">
+                                        <h2 className='font-bold text-md md:text-2xl text-gray-800'>RMG SEPTIC TANK CLEANING SERVICES</h2>
+                                    </div>
+                                    <h2 className="text-xl font-semibold text-gray-700">OFFICIAL RECEIPT</h2>
+                                    <p className="text-sm text-gray-500 mt-1">Official Booking Confirmation</p>
+                                </div>
+                                
+                                <div className="flex justify-between items-center text-sm">
+                                    <div>
+                                        <p className="text-gray-500">Receipt No.</p>
+                                        <p className="font-mono font-bold text-gray-900">
+                                            {selectedBooking.receiptNumber 
+                                                ? selectedBooking.receiptNumber 
+                                                : `BOOK${selectedBooking._id.slice(-6).toUpperCase()}`}
+                                        </p>
+
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-gray-500">Status</p>
+                                        <span className='capitalize font-medium text-sm'>
+                                            {selectedBooking.status}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="p-6">
-                                <div className="w-full h-[400px] rounded-lg overflow-hidden border">
-                                    <iframe
-                                        title="Google Map"
-                                        width="100%"
-                                        height="100%"
-                                        loading="lazy"
-                                        allowFullScreen
-                                        style={{ border: 0 }}
-                                        src={`https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&q=${encodeURIComponent(`${selectedBooking.customerId?.street}, ${selectedBooking.customerId?.barangay}, ${selectedBooking.customerId?.city}, ${selectedBooking.customerId?.province}`)}`}
-                                    ></iframe>
+                            {/* Receipt Body */}
+                            <div className="px-8 py-6 overflow-y-auto bg-white">
+                                {/* Customer & Service Details */}
+                                <div className="mb-6">
+                                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 pb-2 border-b border-gray-200">
+                                        Customer & Service Information
+                                    </h3>
+                                    
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex items-center space-x-2">
+                                                <span className="text-sm text-gray-600">Customer:</span>
+                                            </div>
+                                            <span className="text-sm font-semibold text-gray-900">
+                                                {selectedBooking.customerId?.fullname}
+                                            </span>
+                                        </div>
+                                        
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex items-center space-x-2">
+                                                <span className="text-sm text-gray-600">Service Type:</span>
+                                            </div>
+                                            <span className="text-sm font-semibold text-gray-900">
+                                                {selectedBooking.serviceType?.name || "N/A"}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex items-center space-x-2">
+                                                <span className="text-sm text-gray-600">Service Date:</span>
+                                            </div>
+                                            <span className="text-sm font-semibold text-gray-900">
+                                                {formatDate(selectedBooking.date)}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex items-center space-x-2">
+                                                <span className="text-sm text-gray-600">Service Time:</span>
+                                            </div>
+                                            <span className='text-sm font-semibold text-gray-900'>
+                                                {selectedBooking.time}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Amount Section */}
+                                <div className="bg-gray-50 -mx-8 px-8 py-4">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm font-semibold text-gray-700">Service Amount</span>
+                                        <span className="text-2xl font-bold text-green-600">
+                                            {formatCurrency(selectedBooking.price)}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span className='text-xs text-gray-400 italic'
+                                    >This reciept was given by 
+                                    <span className='font-semibold'> {selectedBooking.technicianId?.fullname}</span>
+                                    </span>
+                                </div>
+                                <div className='mt-6'>
+                                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 pb-2 border-b border-gray-200">
+                                        Proof of Service
+                                    </h3>
+                                
+
+                                    {(selectedBooking.status !== "pending" &&
+                                        selectedBooking.status !== "confirmed" &&
+                                        selectedBooking.status !== "cancelled" &&
+                                        selectedBooking.proofImages.length > 0) && (
+                                        <>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                {selectedBooking.proofImages.map((img, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className="group relative bg-white rounded-lg overflow-hidden border-2 border-gray-200 hover:border-green-400 transition-all duration-300"
+                                                    >
+                                                        <div className="relative">
+                                                            <img
+                                                                src={`${BASE_URL}/${img}`}
+                                                                alt={`Service Proof ${index + 1}`}
+                                                                className="w-full h-56 object-cover"
+                                                            />
+                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                                        </div>
+
+                                                        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => window.open(`${BASE_URL}/${img}`, "_blank")}
+                                                                className="p-2.5 bg-white rounded-lg hover:bg-green-50 transition-colors duration-200 shadow-lg cursor-pointer"
+                                                                title="View full size"
+                                                            >
+                                                                <svg
+                                                                    className="w-5 h-5 text-gray-700"
+                                                                    fill="none"
+                                                                    stroke="currentColor"
+                                                                    viewBox="0 0 24 24"
+                                                                >
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        strokeWidth={2}
+                                                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"
+                                                                    />
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+
+                                                       
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {(selectedBooking.status === "completed" &&
+                                        selectedBooking.proofImages.length === 0) && (
+                                        <div className="text-center py-8 bg-gray-50 rounded-lg">
+                                            <p className="text-sm text-gray-500 italic">No proof uploaded for this completed booking.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Receipt Footer */}
+                            <div className="bg-gray-50 px-8 py-4 border-t-2 border-dashed border-gray-300 flex-shrink-0">
+                                <div className="flex justify-end items-center gap-2">
+                                    <button 
+                                        onClick={() => window.print()}
+                                        className="flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-sm cursor-pointer hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 shadow-sm hover:shadow-md"
+                                        >
+                                        <Printer className="w-4 h-4" />
+                                        Print
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => { 
+                                            setSelectedBooking(null)
+                                            setShowReciept(false)
+                                        }}
+                                        className="px-6 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50 hover:border-gray-400 transition cursor-pointer text-sm font-medium"
+                                    >
+                                        Close
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 )}
-
             </div>
         </SidebarTech>
     );

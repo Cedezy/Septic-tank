@@ -3,8 +3,8 @@ import HeaderAdmin from "../../components/HeaderAdmin";
 import SidebarAdmin from "../../components/SidebarAdmin";
 import axios from "../../api/axios";
 import Slider from "react-slick";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { toast } from 'react-toastify';
+import { ChevronLeft, ChevronRight, X, Upload, Trash2, Image as ImageIcon } from "lucide-react";
+import { toast } from "react-toastify";
 
 const BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
@@ -12,11 +12,11 @@ const AdminGallery = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [services, setServices] = useState([]);
     const [selectedService, setSelectedService] = useState(null);
+    const [editingService, setEditingService] = useState(null);
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [editedImages, setEditedImages] = useState([]);
     const [removedImages, setRemovedImages] = useState([]);
 
-    // Fetch services
     useEffect(() => {
         const fetchServices = async () => {
             try {
@@ -29,89 +29,80 @@ const AdminGallery = () => {
         fetchServices();
     }, []);
 
-    // Open modal
     const handleEdit = (service) => {
-        setSelectedService(service);
-        setEditedImages([...service.images]); // Copy images to editable state
+        setEditedImages([...service.images]);
         setSelectedFiles([]);
+        setEditingService(service);
     };
 
-// Close modal
     const handleCloseModal = () => {
-        setSelectedService(null);
+        setEditingService(null);
         setEditedImages([]);
         setSelectedFiles([]);
+        setRemovedImages([]);
     };
 
-    // Handle file selection
     const handleFileChange = (e) => {
         setSelectedFiles(Array.from(e.target.files));
     };
 
-    // Save / update images
-    // Track deleted images
+    const handleDeleteImage = (imageName) => {
+        setEditedImages((prev) => prev.filter((img) => img !== imageName));
+        setRemovedImages((prev) => [...prev, imageName]);
+    };
 
+    const handleSaveChanges = async () => {
+        if (!editingService) return;
+        const formData = new FormData();
 
-// Delete image (mark for backend)
-const handleDeleteImage = (imageName) => {
-    setEditedImages((prev) => prev.filter((img) => img !== imageName));
-    setRemovedImages((prev) => [...prev, imageName]);
-};
+        formData.append("existingImages", JSON.stringify(editedImages));
 
-// Save / update images
-const handleSaveChanges = async () => {
-    if (!selectedService) return;
-    const formData = new FormData();
+        if (removedImages.length > 0) {
+            formData.append("removedImages", JSON.stringify(removedImages));
+        }
 
-    // Keep existing images
-    formData.append("existingImages", JSON.stringify(editedImages));
-
-    // Add deleted image names
-    if (removedImages.length > 0) {
-        formData.append("removedImages", JSON.stringify(removedImages));
-    }
-
-    // Add new uploads
-    selectedFiles.forEach((file) => {
-        formData.append("images", file);
-    });
-
-    try {
-        await axios.put(`/service/${selectedService._id}`, formData, {
-            headers: { "Content-Type": "multipart/form-data" },
+        selectedFiles.forEach((file) => {
+            formData.append("images", file);
         });
 
-        // Refresh list
-        const response = await axios.get("/service");
-        setServices(response.data.services);
-        toast.success("Images updated successfully!");
+        try {
+            await axios.put(`/service/${editingService._id}`, formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
 
-        // Reset states
-        setRemovedImages([]);
-        handleCloseModal();
-    } catch (err) {
-        console.error("Error updating images:", err);
-    }
-};
+            const response = await axios.get("/service");
+            setServices(response.data.services);
+            toast.success("Images updated successfully!");
+            handleCloseModal();
+        } catch (err) {
+            console.error("Error updating images:", err);
+        }
+    };
 
-    // Slider arrows
     const NextArrow = ({ onClick }) => (
         <div
-            className="absolute top-1/2 right-2 transform -translate-y-1/2 cursor-pointer z-10 text-white bg-black bg-opacity-50 p-2 rounded-full hover:bg-opacity-80"
-            onClick={onClick}
+            className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer z-10 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all duration-200 hover:scale-110"
+            onClick={(e) => {
+                e.stopPropagation(); // Prevent card click
+                onClick();
+            }}
         >
-            <ChevronRight />
+            <ChevronRight className="text-gray-800" size={20} />
         </div>
     );
 
     const PrevArrow = ({ onClick }) => (
         <div
-            className="absolute top-1/2 left-2 transform -translate-y-1/2 cursor-pointer z-10 text-white bg-black bg-opacity-50 p-2 rounded-full hover:bg-opacity-80"
-            onClick={onClick}
+            className="absolute top-1/2 left-3 transform -translate-y-1/2 cursor-pointer z-10 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all duration-200 hover:scale-110"
+            onClick={(e) => {
+                e.stopPropagation(); // Prevent card click
+                onClick();
+            }}
         >
-            <ChevronLeft />
+            <ChevronLeft className="text-gray-800" size={20} />
         </div>
     );
+
 
     const sliderSettings = {
         dots: true,
@@ -121,10 +112,11 @@ const handleSaveChanges = async () => {
         slidesToScroll: 1,
         nextArrow: <NextArrow />,
         prevArrow: <PrevArrow />,
+        dotsClass: "slick-dots !bottom-3",
     };
 
     return (
-        <div className="flex h-screen">
+        <div className="flex h-screen overflow-hidden bg-gray-50">
             <div className="w-full">
                 <div className="mb-36">
                     <HeaderAdmin />
@@ -134,41 +126,83 @@ const handleSaveChanges = async () => {
                     toggleCollapse={() => setIsCollapsed((prev) => !prev)}
                 />
                 <div
-                    className={`flex-1 transition-all duration-300 p-8 ${
+                    className={`flex-1 transition-all duration-300 p-4 overflow-y-auto max-h-[calc(100vh-120px)] ${
                         isCollapsed ? "ml-16" : "ml-72"
                     }`}
                 >
+                    {/* Header Section */}
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className="text-3xl font-bold text-gray-800 mb-1">Gallery Management</h2>
+                                <p className="text-gray-500 text-sm">
+                                    {selectedService 
+                                        ? `Selected: ${selectedService.name}` 
+                                        : "Select a service to edit its images"}
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => selectedService && handleEdit(selectedService)}
+                                disabled={!selectedService}
+                                className={`px-6 py-3 font-semibold rounded-md transition-all duration-200 flex items-center gap-2 shadow-md ${
+                                    selectedService
+                                        ? "bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white transform hover:scale-105"
+                                        : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                }`}
+                            >
+                                <Upload size={18} />
+                                EDIT
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Gallery Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {services.map((service) => (
                             <div
                                 key={service._id}
-                                className="bg-white shadow-md rounded-md flex flex-col items-center relative"
+                                className={`bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1 ${
+                                    selectedService?._id === service._id
+                                        ? "ring-4 ring-green-500 ring-offset-2"
+                                        : "ring-1 ring-gray-200"
+                                }`}
+                                onClick={() =>
+                                    setSelectedService((prev) =>
+                                        prev?._id === service._id ? null : service
+                                    )
+                                }
                             >
-                                {service.images.length > 0 ? (
-                                    <Slider {...sliderSettings} className="w-full h-52">
-                                        {service.images.map((img, index) => (
-                                            <div key={index}>
-                                                <img
-                                                    src={`${BASE_URL}${img}`}
-                                                    alt={`${service.name}-${index}`}
-                                                    className="w-full h-52 object-cover rounded-t-md"
-                                                />
-                                            </div>
-                                        ))}
-                                    </Slider>
-                                ) : (
-                                    <div className="w-full h-52 bg-gray-200 flex items-center justify-center rounded-t-md">
-                                        No Image
-                                    </div>
-                                )}
-                                <div className="flex flex-col justify-center items-center p-4">
-                                    <h3 className="text-lg font-semibold">{service.name}</h3>
-                                    <button
-                                        onClick={() => handleEdit(service)}
-                                        className="mt-2 px-4 py-1 font-semibold bg-green-500 text-white rounded hover:bg-green-600"
-                                    >
-                                        EDIT
-                                    </button>
+                                <div className="relative">
+                                    {service.images.length > 0 ? (
+                                        <Slider {...sliderSettings} className="w-full">
+                                            {service.images.map((img, index) => (
+                                                <div key={index} className="relative">
+                                                    <img
+                                                        src={`${BASE_URL}${img}`}
+                                                        alt={`${service.name}-${index}`}
+                                                        className="w-full h-64 object-cover"
+                                                    />
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                                                </div>
+                                            ))}
+                                        </Slider>
+                                    ) : (
+                                        <div className="w-full h-64 bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center">
+                                            <ImageIcon className="text-gray-400 mb-2" size={48} />
+                                            <span className="text-gray-500 font-medium">No Images</span>
+                                        </div>
+                                    )}
+                                    {selectedService?._id === service._id && (
+                                        <div className="absolute top-3 right-3 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
+                                            Selected
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="p-5">
+                                    <h3 className="text-lg font-bold text-gray-800 mb-1">{service.name}</h3>
+                                    <p className="text-sm text-gray-500">
+                                        {service.images.length} {service.images.length === 1 ? 'image' : 'images'}
+                                    </p>
                                 </div>
                             </div>
                         ))}
@@ -176,77 +210,118 @@ const handleSaveChanges = async () => {
                 </div>
             </div>
 
-          {selectedService && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-                <div className="bg-white rounded-lg shadow-lg w-[500px] max-w-full p-6 relative">
-                    <button
-                        onClick={handleCloseModal}
-                        className="absolute top-3 right-3 text-gray-600 hover:text-gray-800"
-                    >
-                        <X />
-                    </button>
-                    <h2 className="text-xl font-semibold mb-4">
-                        Edit Images - {selectedService.name}
-                    </h2>
-
-                    {editedImages.length > 0 ? (
-                        <div className="grid grid-cols-2 gap-3 mb-4">
-                            {editedImages.map((img, index) => (
-                                <div key={index} className="relative">
-                                    <img
-                                        src={`${BASE_URL}${img}`}
-                                        alt={`current-${index}`}
-                                        className="w-full h-28 object-cover rounded"
-                                    />
-                                    <button
-                                        onClick={() => handleDeleteImage(img)}
-                                        className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 hover:bg-red-700"
-                                        title="Delete this image"
-                                    >
-                                        <X size={14} />
-                                    </button>
+            {/* Enhanced Modal */}
+            {editingService && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
+                    <div className="bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200">
+                        {/* Modal Header */}
+                        <div className="bg-green-600 p-6 text-white">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h2 className="text-2xl font-bold mb-1">Edit Gallery</h2>
+                                    <p className="text-green-100 text-sm">{editingService.name}</p>
                                 </div>
-                            ))}
+                            </div>
                         </div>
-                    ) : (
-                        <p className="text-gray-500 mb-4">No existing images.</p>
-                    )}
 
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Upload new images
-                    </label>
-                    <input
-                        type="file"
-                        multiple
-                        onChange={handleFileChange}
-                        className="block w-full text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer focus:outline-none p-2"
-                    />
+                        {/* Modal Body */}
+                        <div className="p-6 overflow-y-auto flex-1">
+                            {/* Current Images */}
+                            <div className="mb-6">
+                                <h3 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+                                    Current Images ({editedImages.length})
+                                </h3>
+                                {editedImages.length > 0 ? (
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                        {editedImages.map((img, index) => (
+                                            <div key={index} className="relative group">
+                                                <img
+                                                    src={`${BASE_URL}${img}`}
+                                                    alt={`current-${index}`}
+                                                    className="w-full h-32 object-cover rounded-lg shadow-md"
+                                                />
+                                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                                                    <button
+                                                        onClick={() => handleDeleteImage(img)}
+                                                        className="bg-red-500 hover:bg-red-600 text-white rounded-full p-2 shadow-lg transform hover:scale-110 transition-all"
+                                                        title="Delete this image"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                                        <ImageIcon className="text-gray-400 mx-auto mb-2" size={40} />
+                                        <p className="text-gray-500">No existing images</p>
+                                    </div>
+                                )}
+                            </div>
 
-                    {selectedFiles.length > 0 && (
-                        <div className="mt-3 text-sm text-gray-600">
-                            {selectedFiles.length} file(s) selected
+                            {/* Upload New Images */}
+                            <div>
+                                <h3 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+                                    Upload New Images
+                                </h3>
+                                <label className="block">
+                                    <input
+                                        type="file"
+                                        multiple
+                                        onChange={handleFileChange}
+                                        className="hidden"
+                                        accept="image/*"
+                                    />
+                                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-green-500 hover:bg-green-50 transition-all">
+                                        <Upload className="text-gray-400 mx-auto mb-3" size={40} />
+                                        <p className="text-gray-700 font-medium mb-1">
+                                            Click to upload or drag and drop
+                                        </p>
+                                        <p className="text-gray-500 text-sm">
+                                            PNG, JPG, GIF up to 10MB
+                                        </p>
+                                    </div>
+                                </label>
+
+                                {selectedFiles.length > 0 && (
+                                    <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-4">
+                                        <div className="flex items-center gap-2 text-green-700">
+                                            <Upload size={18} />
+                                            <span className="font-medium">
+                                                {selectedFiles.length} file{selectedFiles.length !== 1 ? 's' : ''} ready to upload
+                                            </span>
+                                        </div>
+                                        <div className="mt-2 space-y-1">
+                                            {selectedFiles.map((file, idx) => (
+                                                <p key={idx} className="text-sm text-green-600 truncate">
+                                                    • {file.name}
+                                                </p>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                    )}
 
-                    <div className="mt-6 flex justify-end gap-2">
-                        <button
-                            onClick={handleCloseModal}
-                            className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            onClick={handleSaveChanges}
-                            className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700"
-                        >
-                            Save Changes
-                        </button>
+                        {/* Modal Footer */}
+                        <div className="border-t border-gray-200 p-6 bg-gray-50 flex justify-end gap-3">
+                            <button
+                                onClick={handleCloseModal}
+                                className="px-6 py-2.5 rounded-lg font-medium text-gray-700 bg-white border-2 border-gray-300 hover:bg-gray-50 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSaveChanges}
+                                className="px-6 py-2.5 rounded-lg font-medium text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-md hover:shadow-lg transition-all transform hover:scale-105"
+                            >
+                                Save Changes
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        )}
-
-
+            )}
         </div>
     );
 };

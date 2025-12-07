@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createBooking, getBookingsByCustomer, getAllBookings, updateBookingStatus, assignTechnician, getAssignedTechnician, updateBookingStatusByTechnician, getAvailableTimeSlots, respondToBooking, getBookingHistoryByCustomer, cancelBookingByCustomer, uploadProof, cancelBookingByTechnician } = require('../controllers/BookController');
+const { createBooking, getBookingsByCustomer, getAllBookings, updateBookingStatus, assignTechnician, getAssignedTechnician, updateBookingStatusByTechnician, getAvailableTimeSlots, respondToBooking, getBookingHistoryByCustomer, cancelBookingByCustomer, uploadProof, cancelBookingByTechnician, updateServiceTypeByTechnician  } = require('../controllers/BookController');
 const { userVerification } = require('../middlewares/AuthMiddleware');
 const { requireRoles } = require('../middlewares/RequireMiddleware');
 const upload = require('../middlewares/upload')
@@ -16,6 +16,7 @@ router.put('/assign/:bookingId', userVerification, requireRoles('admin', 'manage
 router.put('/cancel/:bookingId', userVerification, cancelBookingByCustomer);
 router.put('/technician/respond/:bookingId', userVerification, respondToBooking);
 router.put('/technician/update/:bookingId', userVerification, updateBookingStatusByTechnician);
+router.put('/technician/service/:bookingId', userVerification, updateServiceTypeByTechnician);
 router.put('/technician/cancel/:bookingId', userVerification, cancelBookingByTechnician);
 router.post('/technician/proof/:bookingId', upload.array("proofImages", 5), userVerification, uploadProof);
 

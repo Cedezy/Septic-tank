@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import axios from '../lib/axios';
 import { Phone, Mail, MapPin, Send, User, MessageCircle } from 'lucide-react';
 import Loading from './Loading';
+import { useNavigate } from 'react-router-dom';
 
 const ContactUs = () => {
     const [contactInfo, setContactInfo] = useState(null);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     const fetchContactInfo = async () => {
         try{
@@ -36,7 +38,15 @@ const ContactUs = () => {
     return (
         <div className='py-30'>
             <div className="px-4 sm:px-6 lg:px-8">
-                <div className="max-w-7xl mx-auto">
+                <div className="max-w-7xl mx-auto space-y-4">
+                    <button 
+                        type="button"
+                        onClick={() => navigate(-1)}
+                        className="text-gray-600 hover:text-gray-800 flex items-center gap-1 ml-4"
+                        >
+                        <span className="text-xl">←</span>
+                        <span className="text-md font-medium">Back</span>
+                    </button>
                     <div className="text-center mb-16 max-w-4xl mx-auto px-4">
                         <h2 className="text-4xl md:text-5xl text-gray-800 uppercase tracking-tight mb-4">
                             Get in touch
