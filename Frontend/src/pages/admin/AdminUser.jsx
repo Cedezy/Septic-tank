@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import SidebarAdmin from '../../components/SidebarAdmin';
 import HeaderAdmin from '../../components/HeaderAdmin';
-import axios from '../../api/axios';
+import axios from '../../lib/axios';
 import { Search, Printer, Calendar  } from 'lucide-react';
 import { formatDate, shortFormatDate } from '../../utils/FormatDate';
 import { UserX, Users} from 'lucide-react';
@@ -112,12 +112,10 @@ const AdminUser = () => {
     return (
         <div className='flex h-screen overflow-hidden'>
             <div className='w-full'>
-                <div className="mb-36">
-                    <HeaderAdmin />
-                </div>
+                <HeaderAdmin />
                 <SidebarAdmin isCollapsed={isCollapsed} toggleCollapse={() => setIsCollapsed(prev => !prev)} />
                 <div className={`flex flex-col transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-72'}`}>
-                    <div className='p-6 flex flex-col gap-5'>
+                    <div className='px-6 pb-4 flex flex-col gap-5 h-screen pt-40'>
                         <div className='flex justify-center items-center'>
                             <span className='text-2xl tracking-tighter font-medium uppercase text-gray-700'>
                                 List of Registered Users
@@ -204,7 +202,7 @@ const AdminUser = () => {
                             </div>
                         </div>
               
-                        <div ref={printRef} className="bg-white rounded-sm shadow-sm border border-gray-200 max-h-[500px] overflow-y-auto">
+                        <div ref={printRef} className="bg-white rounded-sm shadow-sm border border-gray-200 overflow-y-auto">
                             <h1 className="print-title hidden">List of Registered User</h1>
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50 sticky top-0 z-10">
@@ -315,7 +313,6 @@ const AdminUser = () => {
                                 </button>
                             </div>
                         </div>
-                        
                     </div>
 
                     {isModalOpen && selectedUser && (

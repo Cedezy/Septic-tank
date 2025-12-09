@@ -16,15 +16,6 @@ const bookingSchema = new mongoose.Schema({
         ref: 'ServiceType',
         required: true
     },
-    tankSize: {
-        type: String,
-        enum: ['small', 'medium', 'large', 'xl', null],
-        default: null
-    },
-    capacity: { 
-        type: Number,
-        default: null 
-    },
     price: { 
         type: Number,
          required: true

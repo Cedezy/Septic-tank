@@ -30,13 +30,3 @@ exports.updateFaq = async (req, res) => {
         res.status(400).json({ success: false, message: err.message });
     }
 };
-
-exports.deleteFaq = async (req, res) => {
-    try{
-        await Faq.findByIdAndDelete(req.params.id);
-        res.json({ success: true, message: 'FAQ deleted successfully.' });
-    }
-    catch(err){
-        res.status(400).json({ success: false, message: err.message });
-    }
-};

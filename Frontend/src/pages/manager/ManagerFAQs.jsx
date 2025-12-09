@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from '../../api/axios';
+import axios from '../../lib/axios';
 import SidebarManager from '../../components/SidebarManager';
 import HeaderAdmin from '../../components/HeaderAdmin';
 import { HelpCircle, Search, AlertTriangle, X } from 'lucide-react';

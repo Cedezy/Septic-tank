@@ -5,53 +5,49 @@ const User = require('../models/User');
 
 exports.createBooking = async (req, res) => {
     try {
-        const { date, time, serviceType, tankSize, paymentMethod, notes } = req.body;
+        const { date, time, serviceType, paymentMethod, notes } = req.body;
         const customerId = req.user._id;
+
+        console.log('Booking request:', { date, time, serviceType, paymentMethod, notes, customerId });
 
         const existingBooking = await Booking.findOne({ customerId, date, time });
         if(existingBooking){
             return res.status(400).json({ success: false, message: 'You already have a booking at this time.' });
         }
- 
+
         const service = await ServiceType.findById(serviceType);
         if(!service){
+            console.log('Service not found for ID:', serviceType);
             return res.status(404).json({ success: false, message: 'Service not found.' });
         }
 
-        let price, duration, capacity;
+        let price = service.price;
+        let duration = service.duration;
 
-        if(service.hasTankSize){
-            if(!tankSize || !service.tankOptions[tankSize]){
-                return res.status(400).json({ success: false, message: 'Invalid or missing tank size.' });
-            }
-            price = service.tankOptions[tankSize].price;
-            duration = service.tankOptions[tankSize].duration;
-            capacity = service.tankOptions[tankSize].capacity; 
-        } 
-        else{
-            price = service.fixedPrice;
-            duration = service.fixedDuration;
-            capacity = null; 
-        }
+
+        console.log('Service details:', { price, duration });
 
         const booking = await Booking.create({
             customerId,
             date,
             time,
             serviceType,
-            tankSize: service.hasTankSize ? tankSize : null,
             price,
-            duration,
-            capacity, 
+            duration, 
             paymentMethod,
             notes: notes || ""
         });
+
+        console.log('Booking created:', booking);
+
         res.status(200).json({ success: true, message: "Schedule submitted successfully!", booking });
     } 
     catch(err){
+        console.error('Error in createBooking:', err);
         res.status(500).json({ message: 'Failed to create booking.', success: false });
     }
 };
+
 
 exports.getBookingsByCustomer = async (req, res) => {
     try {
@@ -159,37 +155,50 @@ exports.assignTechnician = async (req, res) => {
             return res.status(404).json({ message: 'Booking not found', success: false });
         }
 
-        // Check if technician has another booking at the same date and time
-        const conflictingBooking = await Booking.findOne({
-            technicianId,
-            date: booking.date,
-            status: { $in: ['pending', 'confirmed'] } // Only count active bookings
-        });
-
-        if (conflictingBooking) {
+        // Check if technician exists and is active
+        const technician = await User.findOne({ _id: technicianId, role: 'technician', isActive: true });
+        if (!technician) {
             return res.status(400).json({
                 success: false,
-                message: `Technician is busy at ${booking.date} ${booking.time}.`
+                message: 'Technician not found or is deactivated.'
+            });
+        }
+
+        // Check technician status
+        const techStatus = await TechnicianStatus.findOne({ technicianId });
+        if (techStatus && techStatus.status === 'unavailable') {
+            return res.status(400).json({
+                success: false,
+                message: `Technician ${technician.fullname} is currently unavailable.`
             });
         }
 
         // Assign technician
         booking.technicianId = technicianId;
+        booking.status = 'pending'; // optional: reset to pending when assigned
         await booking.save();
 
-        // Populate technician fullname
+        // Update technician status to unavailable
+        if (techStatus) {
+            techStatus.status = 'unavailable';
+            await techStatus.save();
+        } else {
+            // create status if doesn't exist
+            await TechnicianStatus.create({ technicianId, status: 'unavailable' });
+        }
+
         await booking.populate('technicianId', 'fullname');
 
         res.status(200).json({
             message: `${booking.technicianId.fullname} assigned successfully.`,
             booking
         });
+
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Failed to assign technician', success: false });
     }
 };
-
 
 
 
@@ -330,7 +339,7 @@ exports.updateBookingStatusByTechnician = async (req, res) => {
 exports.updateServiceTypeByTechnician = async (req, res) => {
     try {
         const { bookingId } = req.params;
-        const { serviceType, tankSize } = req.body;
+        const { serviceType } = req.body;
         const technicianId = req.user._id;
 
         const booking = await Booking.findById(bookingId).populate('serviceType');
@@ -347,19 +356,9 @@ exports.updateServiceTypeByTechnician = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Please select service type.' });
         }
 
-        let price, duration, capacity;
-        if (service.hasTankSize) {
-            if (!tankSize || !service.tankOptions[tankSize]) {
-                return res.status(400).json({ success: false, message: 'Invalid or missing tank size for this service.' });
-            }
-            price = service.tankOptions[tankSize].price;
-            duration = service.tankOptions[tankSize].duration;
-            capacity = service.tankOptions[tankSize].capacity;
-        } else {
-            price = service.fixedPrice;
-            duration = service.fixedDuration;
-            capacity = null;
-        }
+        let price = service.price;
+        let duration = service.duration;
+
 
         // Log previous service
         const oldServiceName = booking.serviceType?.name || 'Unknown Service';
@@ -375,10 +374,8 @@ exports.updateServiceTypeByTechnician = async (req, res) => {
 
         // Update booking
         booking.serviceType = serviceType;
-        booking.tankSize = service.hasTankSize ? tankSize : null;
         booking.price = price;
         booking.duration = duration;
-        booking.capacity = capacity;
 
         await booking.save();
 
@@ -396,28 +393,35 @@ exports.updateServiceTypeByTechnician = async (req, res) => {
 
 
 exports.getAvailableTimeSlots = async (req, res) => {
-    try{
+    try {
         const { date } = req.query;
         if(!date){
             return res.status(400).json({ message: 'Date is required', success: false });
         }
 
-        const allSlots = [
-            '08:00 AM', '09:00 AM', '10:00 AM',
-            '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM'
-        ];
+        const allSlots = ['08:00 AM','09:00 AM','10:00 AM','01:00 PM','02:00 PM','03:00 PM','04:00 PM'];
 
-        const bookings = await Booking.find({ date });
-        const bookedSlots = bookings.map(b => b.time); 
+        const technicians = await User.find({ role: 'technician', isActive: true });
+        const totalTechnicians = technicians.length;
 
-        const availableSlots = allSlots.filter(slot => !bookedSlots.includes(slot));
+        const availableSlots = [];
+
+        for (let slot of allSlots) {
+            const bookingsAtSlot = await Booking.countDocuments({ date, time: slot, status: { $in: ['pending', 'confirmed'] } });
+
+            if (bookingsAtSlot < totalTechnicians) {
+                availableSlots.push(slot);
+            }
+        }
 
         res.status(200).json({ success: true, availableSlots });
-    } 
-    catch(err){
+
+    } catch(err){
         res.status(500).json({ message: 'Failed to fetch available time slots', success: false });
     }
 };
+
+
 
 exports.getBookingHistoryByCustomer = async (req, res) => {
     try {
@@ -460,6 +464,8 @@ exports.cancelBookingByCustomer = async (req, res) => {
         // Check BEFORE cancel
         const MAX_CANCELLATIONS = 3;
         if (customer.cancellationCount >= MAX_CANCELLATIONS) {
+            customer.isActive = false
+             await customer.save();
             return res.status(403).json({
                 success: false,
                 message: `You have exceeded the allowed cancellation limit. Your account has been blocked. Please contact support for further assistance.`

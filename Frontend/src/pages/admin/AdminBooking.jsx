@@ -3,32 +3,30 @@ import { useState, useEffect } from 'react';
 import axios from '../../lib/axios'
 import SidebarAdmin from '../../components/SidebarAdmin';
 import HeaderAdmin from '../../components/HeaderAdmin';
-import { formatDate, shortFormatDate } from '../../utils/FormatDate';
+import { shortFormatDate } from '../../utils/FormatDate';
 import { formatCurrency } from '../../utils/FormatCurrency';
 import { getStatusBadge } from '../../utils/BookingStats';
-import { Search } from 'lucide-react';
-import { FileWarning } from 'lucide-react';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { AlertCircle, Image } from "lucide-react";
-import { ChevronDown } from "lucide-react";
+import { useRef } from 'react';
+import { handlePrint } from '../../utils/PrintUtils';
 import {
   FileText,
+  AlertCircle,
   User,
   Phone,
   MapPin,
   Building2,
   Clock,
-  Package,
+  ChevronDown,
   Wrench,
   Calendar,
   StickyNote,
-  HelpCircle,
   Printer,
-  Fingerprint  
+  Fingerprint,
+  FileWarning,
+  Search
 } from "lucide-react";
-import { useRef } from 'react';
-import { handlePrint } from '../../utils/PrintUtils';
 
 const BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
@@ -177,12 +175,10 @@ const AdminBooking = () => {
     return (
         <div className="h-screen flex overflow-hidden">
             <div className='w-full'>
-                <div className="mb-36">
-                    <HeaderAdmin />
-                </div>
+                <HeaderAdmin />
                 <SidebarAdmin isCollapsed={isCollapsed} toggleCollapse={() => setIsCollapsed(prev => !prev)} />
                 <div className={`flex flex-col transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-72'}`}>
-                    <div className='flex flex-col gap-4 p-6'>
+                    <div className='px-6 pb-4 flex flex-col gap-5 h-screen pt-40'>
                         <div className='flex justify-center items-center'>
                             <span className='text-2xl tracking-tighter font-medium uppercase text-gray-700'>
                                 Customer Bookings

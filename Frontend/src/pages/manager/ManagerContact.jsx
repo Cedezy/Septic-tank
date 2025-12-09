@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import SidebarManager from '../../components/SidebarManager';
 import HeaderAdmin from '../../components/HeaderAdmin';
-import axios from '../../api/axios';
+import axios from '../../lib/axios';
 import { Mail, Phone, MapPin, Facebook, Info } from 'lucide-react';
 
 const ManagerContact = () => {

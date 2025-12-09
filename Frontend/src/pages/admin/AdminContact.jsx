@@ -3,7 +3,7 @@ import SidebarAdmin from '../../components/SidebarAdmin';
 import HeaderAdmin from '../../components/HeaderAdmin';
 import axios from '../../lib/axios';
 import { toast } from 'react-toastify';
-import { Phone, Mail, MapPin, Facebook, Check, Info } from 'lucide-react';
+import { Phone, Mail, MapPin, Facebook, Info } from 'lucide-react';
 
 const AdminContact = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -13,10 +13,13 @@ const AdminContact = () => {
 
     useEffect(() => {
         const fetchContact = async () => {
-            try {
-                const res = await axios.get('/contact', { withCredentials: true });
-                setContact(res.data.contact[0]);
-            } catch (err) {
+            try{
+                const response = await axios.get('/contact', { 
+                    withCredentials: true 
+                });
+                setContact(response.data.contact[0]);
+            } 
+            catch(err){
                 console.log(err);
             }
         };
@@ -31,14 +34,18 @@ const AdminContact = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSaving(true);
-        try {
-            const res = await axios.put('/contact', contact, { withCredentials: true });
-            toast.success(res.data.message);
+        try{
+            const response = await axios.put('/contact', contact, { 
+                withCredentials: true 
+            });
+            toast.success(response.data.message);
             setEditing(false);
-        } catch (err) {
+        } 
+        catch(err){
             console.log(err);
             toast.error('Failed to update contact info');
-        } finally {
+        } 
+        finally{
             setSaving(false);
         }
     };

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../../lib/axios';
 import Header from '../../components/Header';
-import Footer from '../../components/Footer';
 import Loading from '../../components/Loading';
 import { Building2, Info  } from 'lucide-react'
 import { useNavigate } from 'react-router-dom';
@@ -33,7 +32,6 @@ const AboutUs = () => {
                 <div className='flex items-center justify-center min-h-screen'>
                     <Loading />
                 </div>
-                <Footer />
             </div>
         );
     }

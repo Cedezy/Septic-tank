@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import axios from '../../api/axios';
+import axios from '../../lib/axios';
 import { toast } from 'react-toastify';
 import SidebarAdmin from '../../components/SidebarAdmin';
 import HeaderAdmin from '../../components/HeaderAdmin';
 import { formatCurrency } from '../../utils/FormatCurrency';
-import { Plus } from 'lucide-react';
 import { FaTrash } from "react-icons/fa";
-import { MdEdit } from "react-icons/md";
-import { ClipboardList, AlertTriangle, Eye } from "lucide-react";
-import { Package, X, Image, Search, Images } from 'lucide-react';
-import { Droplet, Timer, Building2, FileText } from "lucide-react";
+import { Package, Image, Search, Timer } from 'lucide-react';
 
 const BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
@@ -19,15 +15,8 @@ const AdminServices = () => {
     const [formData, setFormData] = useState({
         name: '',
         description: '',
-        hasTankSize: true,
-        tankOptions: {  
-            small: { price: '', capacity: '', duration: '' },
-            medium: { price: '', capacity: '', duration: '' },
-            large: { price: '', capacity: '', duration: '' },
-            xl: { price: '', capacity: '', duration: '' },
-        },
-        fixedPrice: '',     
-        fixedDuration: '',  
+        price: '',
+        duration: '',
         images: [],
         existingImages: [],
         removedImages: [],
@@ -38,7 +27,6 @@ const AdminServices = () => {
     const [selectedService, setSelectedService] = useState(null);
     const [showImageModal, setShowImageModal] = useState(false);
     const [imageService, setImageService] = useState(null);
-
 
     useEffect(() => {
         fetchServices();
@@ -60,16 +48,9 @@ const AdminServices = () => {
         const dataToSend = new FormData();
         dataToSend.append("name", formData.name);
         dataToSend.append("description", formData.description);
-        dataToSend.append("hasTankSize", formData.hasTankSize);
         dataToSend.append("showOnHome", formData.showOnHome);
-
-        if(formData.hasTankSize){
-            dataToSend.append("tankOptions", JSON.stringify(formData.tankOptions));
-        } 
-        else{
-            dataToSend.append("fixedPrice", formData.fixedPrice);
-            dataToSend.append("fixedDuration", formData.fixedDuration);
-        }
+        dataToSend.append("price", formData.price);
+        dataToSend.append("duration", formData.duration);
 
         if(formData.images && formData.images.length > 0){
             formData.images.forEach(img => {
@@ -111,10 +92,8 @@ const AdminServices = () => {
         setFormData({
             name: service.name,
             description: service.description,
-            hasTankSize: service.hasTankSize,
-            tankOptions: service.tankOptions || { small:{}, medium:{}, large:{}, xl:{} },
-            fixedPrice: service.fixedPrice || '',
-            fixedDuration: service.fixedDuration || '',
+            price: service.price || '',
+            duration: service.duration || '',
             images: [],
             existingImages: service.images || [],
             removedImages: [],
@@ -279,14 +258,14 @@ const AdminServices = () => {
                                                         <div className="flex items-center justify-between mb-2">
                                                             <span className="text-sm font-medium text-gray-700">Fixed Price</span>
                                                             <span className="text-2xl font-bold text-gray-900">
-                                                                {formatCurrency(service.fixedPrice)}
+                                                                {formatCurrency(service.price)}
                                                             </span>
                                                         </div>
                                                         <div className="flex items-center text-sm text-gray-600">
                                                             <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                                             </svg>
-                                                            {service.fixedDuration} {service.fixedDuration > 1 ? 'hours' : 'hour'}
+                                                            {service.duration} {service.duration > 1 ? 'hours' : 'hour'}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -415,8 +394,8 @@ const AdminServices = () => {
                                                     step="0.01"
                                                     min="0"
                                                     placeholder="0.00"
-                                                    value={formData.fixedPrice || ""}
-                                                    onChange={(e) => setFormData({ ...formData, fixedPrice: e.target.value })}
+                                                    value={formData.price || ""}
+                                                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                                                     className="w-full border-2 border-gray-200 rounded-md px-3 py-2 text-sm"
                                                 />
                                             </div>
@@ -432,8 +411,8 @@ const AdminServices = () => {
                                                         type="number"
                                                         min="0"
                                                         placeholder="Enter duration"
-                                                        value={formData.fixedDuration || ""}
-                                                        onChange={(e) => setFormData({ ...formData, fixedDuration: e.target.value })}
+                                                        value={formData.duration || ""}
+                                                        onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
                                                         className="w-full border-2 pl-8 border-gray-200 rounded-md text-sm px-3 py-2"
                                                     />
                                                 </div>     
@@ -487,7 +466,17 @@ const AdminServices = () => {
                                                 type="button"
                                                 onClick={() => {
                                                     setShowForm(false);
-                                                    setFormData({ name: "", description: "", price: "", status: "", images: [], existingImages: [], removedImages: [] });
+                                                    setFormData({
+                                                        name: "",
+                                                        description: "",
+                                                        price: "",
+                                                        duration: "",
+                                                        images: [],
+                                                        existingImages: [],
+                                                        removedImages: [],
+                                                        showOnHome: false
+                                                    });
+
                                                     setEditingId(null);
                                                     setSelectedService(null)
                                                 }}

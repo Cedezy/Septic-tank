@@ -53,20 +53,8 @@ const TechSchedule = () => {
     const [showReciept, setShowReciept] = useState(false);
     const [showPendingModal, setShowPendingModal] = useState(false);
     const [showChangeServiceModal, setShowChangeServiceModal] = useState(false);
-    const [selectedTankSize, setSelectedTankSize] = useState("");
     const [orNumber, setOrNumber] = useState('');
     const [showServiceTypeModal, setShowServiceTypeModal] = useState(false)
-    const [showTankSizeModal, setShowTankSizeModal] = useState(false)
-    const [showFilterModal, setShowFilterModal] = useState(false);
-
-const filterOptions = [
-  { value: "all", label: "All" },
-  { value: "name", label: "Customer Name" },
-  { value: "serviceType", label: "Service Type" },
-  { value: "remarks", label: "Remarks" },
-  { value: "date", label: "Date" }
-];
-
 
     const fetchBookings = async () => {
         try{
@@ -112,7 +100,6 @@ const filterOptions = [
                 `/book/technician/service/${selectedBooking._id}`,
                 { 
                     serviceType: selectedBooking.newServiceType,
-                    tankSize: selectedTankSize
                 },
                 { withCredentials: true }
             );
@@ -120,11 +107,9 @@ const filterOptions = [
             toast.success(response.data.message);
             fetchBookings();
             setShowChangeServiceModal(false);
-            setSelectedTankSize("");
-
             setTimeout(() => {
-            setSelectedBooking(null);
-        }, 100);
+                setSelectedBooking(null);
+            }, 100);
         } catch (err) {
             console.error(err);
             toast.error(err.response?.data?.message);
@@ -289,7 +274,7 @@ const filterOptions = [
 
     return (
         <SidebarTech>
-            <div className="max-w-7xl mx-auto h-screen">    
+            <div className="max-w-7xl h-screen overflow-hidden mx-auto">    
                 <div className='max-w-7xl mx-auto'>
                     <div className='flex flex-col gap-5'>
                         <div className="flex items-center justify-between">
@@ -807,37 +792,21 @@ const filterOptions = [
                                     </div>
                                 </div>
 
-                                {/* Tank Size Select */}
-                                {selectedBooking.serviceDetails?.hasTankSize && (
-                                    <div className="relative w-full">
-                                        <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
-                                            Tank Size <span className="text-red-500 ml-1">*</span>
-                                        </label>
-                                        <div
-                                            className="w-full border-2 border-gray-200 rounded-lg py-3 px-4 cursor-pointer relative"
-                                            onClick={() => setShowTankSizeModal(true)}>
-                                            {selectedTankSize || "Select Tank Size..."}
-                                        </div>
-                                    </div>
-                                )}
                             </div>
-                            {/* Price + Duration (only if service has no tank size) */}
-                            {selectedBooking.serviceDetails && !selectedBooking.serviceDetails.hasTankSize && (
+                            {selectedBooking.serviceDetails && (
                                 <div className="px-6 pb-2">
                                     <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
                                         <p className="text-gray-700 font-semibold">
-                                            Price: ₱{selectedBooking.serviceDetails.fixedPrice}
+                                            Price: ₱{selectedBooking.serviceDetails.price}
                                         </p>
                                         <p className="text-gray-600 text-sm">
-                                            Duration: {formatHours(selectedBooking.serviceDetails.fixedDuration)}
+                                            Duration: {formatHours(selectedBooking.serviceDetails.duration)}
                                         </p>
                                     </div>
                                 </div>
                             )}
 
 
-
-                            {/* Actions */}
                             <div className="px-6 pb-6 space-y-2">
                                 <button
                                     className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md transition-colors duration-200"
@@ -888,7 +857,6 @@ const filterOptions = [
                                                     newServiceType: service._id, 
                                                     serviceDetails: service 
                                                 });
-                                                setSelectedTankSize("");
                                                 setShowServiceTypeModal(false);
                                             }}
                                             className="w-full group px-4 py-3.5 bg-white border-2 border-gray-100 rounded-md hover:border-blue-500 hover:bg-blue-50 transition-all text-left font-medium text-gray-700 hover:text-blue-700 hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
@@ -898,56 +866,6 @@ const filterOptions = [
                                                 <svg className="w-5 h-5 text-gray-300 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                                 </svg>
-                                            </div>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Tank Size Modal */}
-                {showTankSizeModal && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 animate-in fade-in duration-200">
-                        <div className="bg-white rounded-md w-full max-w-md shadow-2xl transform transition-all">
-                            {/* Header */}
-                            <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                                <div>
-                                    <h3 className="text-xl font-bold text-gray-900">Select Tank Size</h3>
-                                </div>
-                                <button
-                                    onClick={() => setShowTankSizeModal(false)}
-                                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
-                                >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
-
-                            {/* List */}
-                            <div className="p-4 max-h-96 overflow-y-auto">
-                                <div className="space-y-2">
-                                    {Object.entries(selectedBooking.serviceDetails.tankOptions).map(([size, option]) => (
-                                        <button
-                                            key={size}
-                                            onClick={() => {
-                                                setSelectedTankSize(size);
-                                                setShowTankSizeModal(false);
-                                            }}
-                                            className="w-full group px-4 py-3.5 bg-white border-2 border-gray-100 rounded-md hover:border-green-500 hover:bg-green-50 transition-all text-left font-medium text-gray-700 hover:text-green-700 hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
-                                        >
-                                            <div className="flex flex-col">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="font-semibold">{size.charAt(0).toUpperCase() + size.slice(1)}</span>
-                                                    <svg className="w-5 h-5 text-gray-300 group-hover:text-green-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                                    </svg>
-                                                </div>
-                                                <span className="text-sm text-gray-500 mt-1">
-                                                    ₱{option.price} - {formatHours(option.duration)} - {option.capacity}L
-                                                </span>
                                             </div>
                                         </button>
                                     ))}

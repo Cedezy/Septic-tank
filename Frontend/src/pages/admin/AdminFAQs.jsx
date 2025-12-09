@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import axios from '../../api/axios';
+import axios from '../../lib/axios';
 import SidebarAdmin from '../../components/SidebarAdmin';
 import HeaderAdmin from '../../components/HeaderAdmin';
 import { toast } from 'react-toastify';
-import { HelpCircle, Search, AlertTriangle, X } from 'lucide-react';
+import { HelpCircle } from 'lucide-react';
 import { formatDate } from '../../utils/FormatDate'
-import { FaTrash } from "react-icons/fa";
-import { MdEdit } from "react-icons/md";
 
 const AdminFAQs = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);

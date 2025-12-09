@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import HeaderAdmin from "../../components/HeaderAdmin";
 import SidebarAdmin from "../../components/SidebarAdmin";
-import axios from "../../api/axios";
+import axios from "../../lib/axios";
 import Slider from "react-slick";
 import { ChevronLeft, ChevronRight, X, Upload, Trash2, Image as ImageIcon } from "lucide-react";
 import { toast } from "react-toastify";
@@ -19,10 +19,11 @@ const AdminGallery = () => {
 
     useEffect(() => {
         const fetchServices = async () => {
-            try {
+            try{
                 const response = await axios.get("/service");
                 setServices(response.data.services);
-            } catch (err) {
+            } 
+            catch(err){
                 console.error("Error fetching services:", err);
             }
         };

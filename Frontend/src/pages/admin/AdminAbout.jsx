@@ -3,7 +3,6 @@ import SidebarAdmin from '../../components/SidebarAdmin';
 import HeaderAdmin from '../../components/HeaderAdmin';
 import axios from '../../lib/axios';
 import { toast } from 'react-toastify';
-import { Info, Check } from 'lucide-react';
 
 const AdminAbout = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -12,10 +11,13 @@ const AdminAbout = () => {
     const [saving, setSaving] = useState(false);
 
     const fetchAbout = async () => {
-        try {
-            const res = await axios.get('/about', { withCredentials: true });
-            setAboutData(res.data.about[0]);
-        } catch (err) {
+        try{
+            const response = await axios.get('/about', { 
+                withCredentials: true 
+            });
+            setAboutData(response.data.about[0]);
+        } 
+        catch (err) {
             console.error(err);
         }
     };
@@ -32,14 +34,18 @@ const AdminAbout = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSaving(true);
-        try {
-            const res = await axios.put('/about', aboutData);
-            toast.success(res.data.message);
+        try{
+            const response = await axios.put('/about', aboutData ,{
+                withCredentials: true
+            });
+            toast.success(response.data.message);
             setEditing(false);
-        } catch (err) {
+        } 
+        catch(err){
             console.error(err);
             toast.error('Failed to update About Us');
-        } finally {
+        } 
+        finally {
             setSaving(false);
         }
     };

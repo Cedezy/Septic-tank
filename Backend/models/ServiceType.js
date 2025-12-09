@@ -5,38 +5,20 @@ const serviceTypeSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    description: String,
-
-    hasTankSize: {
-        type: Boolean,
-        default: true,
+    description: {
+        type: String,
+        required: true,
     },
 
-    tankOptions: {
-        small: {
-            capacity: { type: Number }, 
-            price: { type: Number },
-            duration: { type: Number } 
-        },
-        medium: {
-            capacity: { type: Number }, 
-            price: { type: Number },
-            duration: { type: Number }
-        },
-        large: {
-            capacity: { type: Number }, 
-            price: { type: Number },
-            duration: { type: Number }
-        },
-        xl: {
-            capacity: { type: Number }, 
-            price: { type: Number },
-            duration: { type: Number }
-        }
+    price: {
+        type: Number,
+        required: true,
     },
 
-    fixedPrice: { type: Number },
-    fixedDuration: { type: Number }, 
+    duration: {
+        type: Number, // in hours
+        required: true,
+    },
 
     status: {
         type: String,
@@ -46,13 +28,14 @@ const serviceTypeSchema = new mongoose.Schema({
 
     images: {
         type: [String],
+        default: []
     },
+
     showOnHome: {
         type: Boolean,
-        default: false, 
+        default: false
     }
-}, {
-    timestamps: true
-});
+
+}, { timestamps: true });
 
 module.exports = mongoose.model('ServiceType', serviceTypeSchema);

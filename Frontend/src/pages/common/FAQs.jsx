@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from '../../lib/axios';
 import { ChevronDown, ChevronUp, Search, HelpCircle, Sparkles } from 'lucide-react';
 import Header from '../../components/Header';
-import Footer from '../../components/Footer';
 import { Link } from 'react-router-dom';
 import Loading from '../../components/Loading';
 import { useNavigate } from 'react-router-dom';
@@ -40,7 +39,6 @@ const FAQs = () => {
                  <div className='flex items-center justify-center min-h-screen'>
                     <Loading/>
                 </div>
-                <Footer/>
             </div>
         );
     }

@@ -10,27 +10,23 @@ import Book from './pages/common/Book';
 import AboutUs from './pages/common/AboutUs';
 import Contact from './pages/common/Contact';
 import FAQs from './pages/common/FAQs';
-import ReviewsPage from './pages/common/ReviewsPage';
-import PaymentSuccess from './pages/common/PaymentSuccess';
-import PaymentFailed from './pages/common/PaymentFailed';
+
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminCustomer from './pages/admin/AdminCustomer';
 import AdminUser from './pages/admin/AdminUser';
 import AdminBooking from './pages/admin/AdminBooking';
-import AdminSchedule from './pages/admin/AdminSchedule';
 import AdminServices1 from './pages/admin/AdminServices1'
-import AdminServices from './pages/admin/AdminServices';
-import AdminMessage from './pages/admin/AdminMessage';
 import AdminAbout from './pages/admin/AdminAbout';
 import AdminContact from './pages/admin/AdminContact';
 import AdminFAQs from './pages/admin/AdminFAQs';
 import AdminAccount from './pages/admin/AdminAccount';
 import AdminUserAccounts from './pages/admin/AdminUserAccounts';
-import AdminDates from './pages/admin/AdminDates';
-import AdminReview from './pages/admin/AdminReview';
-import AdminTech from './pages/admin/AdminTech';
+import AdminServices from './pages/admin/AdminServices';
+import AdminGallery from './pages/admin/AdminGallery';
+
 import CustomerDashboard from './pages/customer/CustomerDashboard';
 import CustomerBooking from './pages/customer/CustomerBooking';
+
 import MangagerDashboard from './pages/manager/ManagerDashboard';
 import ManagerUser from './pages/manager/ManagerUser';
 import ManagerCustomer from './pages/manager/ManagerCustomer';
@@ -43,12 +39,12 @@ import ManagerContact from './pages/manager/ManagerContact';
 import ManagerFAQs from './pages/manager/ManagerFAQs';
 import ManagerAccount from './pages/manager/ManagerAccount';
 import ManagerGallery from './pages/manager/ManagerGallery';
+
 import TechDashboard from './pages/technician/TechDashboard';
 import TechSchedule from './pages/technician/TechSchedule';
 import TechAbout from './pages/technician/TechAbout';
 import TechContact from './pages/technician/TechContact';
 import TechAccount from './pages/technician/TechAccount';
-import AdminGallery from './pages/admin/AdminGallery';
 import TechServices from './pages/technician/TechServices';
 
 const App = () => {
@@ -65,9 +61,6 @@ const App = () => {
         <Route path="/aboutus" element={<AboutUs />} />
         <Route path="/contactus" element={<Contact />} />
         <Route path="/faqs" element={<FAQs />} />
-        <Route path="/reviews" element={<ReviewsPage />} />
-        <Route path="/payment-success" element={<PaymentSuccess />} />
-        <Route path="/payment-failed" element={<PaymentFailed />} />
         <Route path="/admin">
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="customers" element={<AdminCustomer />} />
@@ -75,17 +68,12 @@ const App = () => {
           <Route path="bookings" element={<AdminBooking />} />
           <Route path="services1" element={<AdminServices1 />} />
           <Route path="services" element={<AdminServices />} />
-          <Route path="schedule" element={<AdminSchedule />} />
-          <Route path="messages" element={<AdminMessage />} />
           <Route path="about" element={<AdminAbout />} />
           <Route path="contact" element={<AdminContact />} />
           <Route path="faqs" element={<AdminFAQs />} />
           <Route path="account-settings" element={<AdminAccount />} />
           <Route path="user-accounts" element={<AdminUserAccounts />} />
-          <Route path="blocked-dates" element={<AdminDates />} />
-          <Route path="reviews" element={<AdminReview />} />
           <Route path="gallery" element={<AdminGallery />} />
-          <Route path="technician" element={<AdminTech />} />
         </Route>
         <Route path="/customer">
           <Route path="dashboard" element={<CustomerDashboard />} />

@@ -4,24 +4,22 @@ import axios from '../../lib/axios';
 import SidebarAdmin from '../../components/SidebarAdmin';
 import HeaderAdmin from '../../components/HeaderAdmin';
 import { formatDate } from '../../utils/FormatDate';
+import { toast } from 'react-toastify';
 import { 
-    Plus, 
-    Search, 
-    UserPlus,
     Users,
     Shield,
     Wrench,
     User,
-    X,
+    UserX,
     Mail,
-    UserCheck ,
     Phone,
-    MapPin 
+    MapPin,
+    Lock, 
+    Eye,
+    EyeOff,
+    AlertTriangle, 
+    CalendarDays 
 } from 'lucide-react';
-import { Lock, Eye, EyeOff } from 'lucide-react';
-import { Ban, UserX } from 'lucide-react';
-import { Pencil, AlertTriangle, CalendarDays, Calendar} from 'lucide-react';
-import { toast } from 'react-toastify';
 
 const AdminUserAccounts = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);

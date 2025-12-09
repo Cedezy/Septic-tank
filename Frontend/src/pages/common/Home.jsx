@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Header from "../../components/Header";
 import { useAuth } from "../../context/AuthContext";
-import axios from "../../api/axios";
+import axios from "../../lib/axios";
 
 const BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 

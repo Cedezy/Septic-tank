@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import HeaderAdmin from "../../components/HeaderAdmin";
 import SidebarManager from "../../components/SidebarManager";
-import axios from "../../api/axios";
+import axios from "../../lib/axios";
 import Slider from "react-slick";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 

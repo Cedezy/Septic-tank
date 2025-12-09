@@ -107,7 +107,7 @@ const SidebarAdmin = ({ isCollapsed }) => {
     };
 
     return (
-        <div className="fixed flex h-screen bg-gray-50">
+        <div className="fixed top-[150px] left-0 h-[calc(100vh-144px)] flex bg-gray-50 z-40">
             <div className={`bg-white shadow-xl transition-all duration-300 ease-in-out ${isCollapsed ? 'w-16' : 'w-72'} flex flex-col`}>
                 <div className="p-4 border-b border-gray-200 flex items-center justify-between">
                     <div>

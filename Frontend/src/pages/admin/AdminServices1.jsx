@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import axios from '../../api/axios';
+import axios from '../../lib/axios';
 import SidebarAdmin from '../../components/SidebarAdmin';
 import HeaderAdmin from '../../components/HeaderAdmin';
 import { formatCurrency } from '../../utils/FormatCurrency';
-import { ClipboardList, AlertTriangle, Eye } from "lucide-react";
-import { Package, X, Image, Search, Images } from 'lucide-react';
+import { Image } from 'lucide-react';
 
 const BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
@@ -121,14 +120,14 @@ const ManagerServices1 = () => {
                                                             <div className="flex items-center justify-between mb-2">
                                                                 <span className="text-sm font-medium text-gray-700">Fixed Price</span>
                                                                 <span className="text-2xl font-bold text-gray-900">
-                                                                    {formatCurrency(service.fixedPrice)}
+                                                                    {formatCurrency(service.price)}
                                                                 </span>
                                                             </div>
                                                             <div className="flex items-center text-sm text-gray-600">
                                                                 <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                                                 </svg>
-                                                                {service.fixedDuration} {service.fixedDuration > 1 ? 'hours' : 'hour'}
+                                                                {service.duration} {service.duration > 1 ? 'hours' : 'hour'}
                                                             </div>
                                                         </div>
                                                     )}

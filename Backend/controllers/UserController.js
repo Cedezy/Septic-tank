@@ -1,6 +1,5 @@
 const User = require('../models/User');
 const Booking = require('../models/Booking');
-const { paginate } = require('../util/paginate');
 const calculateAge = require('../util/calculateAge');
 const bcrypt = require('bcryptjs');
 
@@ -161,8 +160,6 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-
-
 exports.updateAccountSettings = async (req, res) => {
     try {
         const { 
@@ -217,31 +214,6 @@ exports.updateAccountSettings = async (req, res) => {
         res.status(500).json({ success: false, message: 'Update failed.', error: err.message });
     }
 };
-
-
-exports.deleteUser = async (req, res) => {
-    try {
-        const userId = req.params.userId;
-
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found.' });
-        }
-
-        // Delete all bookings related to this user (if applicable)
-        await Booking.deleteMany({ customerId: userId });
-
-        // Get role before deleting
-        const role = user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'User';
-
-        await User.findByIdAndDelete(userId);
-        res.json({ success: true, message: `${role} deleted successfully.` });
-    } 
-    catch (err) {
-        res.status(500).json({ success: false, message: 'Failed to delete user.', error: err.message });
-    }
-};
-
 
 exports.getCurrentUser = async (req, res) => {
     try{

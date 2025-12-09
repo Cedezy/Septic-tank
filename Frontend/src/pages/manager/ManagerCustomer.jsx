@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import SidebarManager from '../../components/SidebarManager';
 import HeaderAdmin from '../../components/HeaderAdmin';
-import axios from '../../api/axios';
+import axios from '../../lib/axios';
 import { formatDate, shortFormatDate } from '../../utils/FormatDate';
 import { formatCurrency } from '../../utils/FormatCurrency';
 import { Search, UserX, CalendarDays, Printer, Users, FileText } from 'lucide-react';
@@ -135,12 +135,10 @@ const ManagerCustomer = () => {
     return (
         <div className="h-screen overflow-hidden flex">
             <div className='w-full'>
-                <div className="mb-36">
-                    <HeaderAdmin />
-                </div>
+                <HeaderAdmin />
                 <SidebarManager isCollapsed={isCollapsed} toggleCollapse={() => setIsCollapsed(prev => !prev)} />
                 <div className={`flex flex-col transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-72'}`}>
-                    <div className="p-6 flex flex-col gap-5">
+                    <div className='px-6 pb-4 flex flex-col gap-5 h-screen pt-40'>
                         <div className='flex justify-center items-center'>
                             <span className='text-2xl tracking-tighter font-medium uppercase text-gray-700'>
                                 List of Customers

@@ -3,7 +3,7 @@ const router = express.Router();
 const { userVerification } = require('../middlewares/AuthMiddleware'); 
 const { requireAdmin } = require('../middlewares/RequireMiddleware');
 const { 
-    createUser, getUserById, getAllUsers, getUserByRole, updateUser, deleteUser, 
+    createUser, getUserById, getAllUsers, getUserByRole, updateUser, 
     getCurrentUser, deactivateUser, reactivateUser, updateAccountSettings
 } = require('../controllers/UserController');
 
@@ -16,6 +16,5 @@ router.get('/', userVerification, getAllUsers);
 router.get('/:role', userVerification, getUserByRole);     
 router.get('/:userId', userVerification, getUserById);      
 router.put('/:userId', userVerification, updateUser);
-router.delete('/:userId', userVerification, requireAdmin, deleteUser);
 
 module.exports = router;

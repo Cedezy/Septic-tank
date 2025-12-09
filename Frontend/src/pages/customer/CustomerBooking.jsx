@@ -3,7 +3,6 @@ import Header from '../../components/Header';
 import axios from '../../lib/axios';
 import { formatDate, shortFormatDate } from '../../utils/FormatDate';
 import { toast } from 'react-toastify';
-import Footer from '../../components/Footer';
 import Loading from '../../components/Loading';
 import { Link } from 'react-router-dom';
 import { formatCurrency } from '../../utils/FormatCurrency';
@@ -79,7 +78,6 @@ const CustomerBooking = () => {
                 <div className='flex items-center justify-center min-h-screen'>
                     <Loading />
                 </div>
-                <Footer />
             </div>
         );
     }

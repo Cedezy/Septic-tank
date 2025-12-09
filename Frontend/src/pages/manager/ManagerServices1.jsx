@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from '../../api/axios';
+import axios from '../../lib/axios';
 import SidebarManager from '../../components/SidebarManager';
 import HeaderAdmin from '../../components/HeaderAdmin';
 import { formatCurrency } from '../../utils/FormatCurrency';
@@ -94,52 +94,26 @@ const ManagerServices1 = () => {
                                                     </p>
                                                 </div>
 
-                                                <div className="space-y-4">
-                                                    {service.hasTankSize ? (
-                                                        <div className="grid grid-cols-2 gap-2">
-                                                            {Object.entries(service.tankOptions || {}).map(([size, info]) => (
-                                                                <div key={size} className="bg-gray-50 rounded-lg p-2 border border-gray-100">
-                                                                    <div className="flex items-center justify-between mb-2">
-                                                                        <span className="text-sm font-medium text-gray-700 capitalize">
-                                                                            {size} Tank
-                                                                        </span>
-                                                                    </div>
-                                                                    <div className="flex items-center text-sm text-gray-500">
-                                                                        <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                                        </svg>
-                                                                        {info.duration} {info.duration > 1 ? 'hours' : 'hour'}
-                                                                    </div>
-                                                                    <div>
-                                                                        <span className="text-lg font-bold text-gray-900">
-                                                                            {formatCurrency(info.price || 0)}
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                            ))}
+                                                <div className="space-y-4">           
+                                                    <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4 border border-green-100">
+                                                        <div className="flex items-center justify-between mb-2">
+                                                            <span className="text-sm font-medium text-gray-700">Fixed Price</span>
+                                                            <span className="text-2xl font-bold text-gray-900">
+                                                                {formatCurrency(service.price)}
+                                                            </span>
                                                         </div>
-                                                    ) : (
-                                                        <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4 border border-green-100">
-                                                            <div className="flex items-center justify-between mb-2">
-                                                                <span className="text-sm font-medium text-gray-700">Fixed Price</span>
-                                                                <span className="text-2xl font-bold text-gray-900">
-                                                                    {formatCurrency(service.fixedPrice)}
-                                                                </span>
-                                                            </div>
-                                                            <div className="flex items-center text-sm text-gray-600">
-                                                                <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                                </svg>
-                                                                {service.fixedDuration} {service.fixedDuration > 1 ? 'hours' : 'hour'}
-                                                            </div>
+                                                        <div className="flex items-center text-sm text-gray-600">
+                                                            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                            </svg>
+                                                            {service.duration} {service.duration > 1 ? 'hours' : 'hour'}
                                                         </div>
-                                                    )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
-                                /* SERVICE CARDS END */
                             )}
                         </div>
 

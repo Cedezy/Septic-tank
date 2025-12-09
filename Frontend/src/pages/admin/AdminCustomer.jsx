@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import SidebarAdmin from '../../components/SidebarAdmin';
 import HeaderAdmin from '../../components/HeaderAdmin';
-import axios from '../../api/axios';
+import axios from '../../lib/axios';
 import { formatDate, shortFormatDate } from '../../utils/FormatDate';
 import { formatCurrency } from '../../utils/FormatCurrency';
-import { Search, UserX, CalendarDays, Printer, Users, FileText } from 'lucide-react';
+import { Search, UserX, CalendarDays, Printer, Users } from 'lucide-react';
 import { useRef } from 'react';
 import { handlePrint } from '../../utils/PrintUtils';
 import { getStatusBadge } from '../../utils/BookingStats';
@@ -18,7 +18,6 @@ const AdminCustomer = () => {
     const [filteredCustomers, setFilteredCustomers] = useState([]);
     const [search, setSearch] = useState('');
     const [filterType, setFilterType] = useState("all");
-    const [hasSelected, setHasSelected] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [showHistory, setShowHistory] = useState(false);
@@ -136,12 +135,10 @@ const AdminCustomer = () => {
     return (
         <div className="h-screen overflow-hidden flex">
             <div className='w-full'>
-                <div className="mb-36">
-                    <HeaderAdmin />
-                </div>
+                <HeaderAdmin />
                 <SidebarAdmin isCollapsed={isCollapsed} toggleCollapse={() => setIsCollapsed(prev => !prev)} />
                 <div className={`flex flex-col transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-72'}`}>
-                    <div className="p-6 flex flex-col gap-5">
+                    <div className='px-6 pb-4 flex flex-col gap-5 h-screen pt-40'>
                         <div className='flex justify-center items-center'>
                             <span className='text-2xl tracking-tighter font-medium uppercase text-gray-700'>
                                 List of Customers
@@ -192,8 +189,7 @@ const AdminCustomer = () => {
                             </div>
                         </div>
 
-
-                        <div ref={printRef} className="bg-white rounded-sm shadow-sm border border-gray-200 max-h-[500px] overflow-y-auto">
+                        <div ref={printRef} className="bg-white rounded-sm shadow-sm border border-gray-200 overflow-y-auto">
                             <h1 className="print-title hidden">List of Customers</h1>
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50 sticky top-0 z-10">

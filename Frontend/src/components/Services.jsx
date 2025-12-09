@@ -16,11 +16,8 @@ const BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 const Services = ({ showHomeOnly = false }) => {
     const [services, setServices] = useState([]);
     const [selectedService, setSelectedService] = useState(null);
-    const [tankSize, setTankSize] = useState(null);
     const [submitting, setSubmitting] = useState(false);
     const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
-    const [blockedDatesInfo, setBlockedDatesInfo] = useState([]); 
-    //const [blockedDates, setBlockedDates] = useState([]); 
     const [step, setStep] = useState(1);
     const [bookingSummary, setBookingSummary] = useState(null);
     const [paymentMethod, setPaymentMethod] = useState('');
@@ -67,19 +64,6 @@ const Services = ({ showHomeOnly = false }) => {
         }
     }
 
-    useEffect(() => {
-        const fetchBlockedDates = async () => {
-            try {
-            const res = await axios.get('/date');
-                setBlockedDatesInfo(res.data);
-                //setBlockedDates(res.data.map(d => d.date));
-            } catch (err) {
-                console.error('Failed to load blocked dates:', err);
-            }
-        };
-        fetchBlockedDates();
-    }, []);
-
     const handleInputChange = (e) => {
         const { name, value } = e.target;
 
@@ -96,33 +80,20 @@ const Services = ({ showHomeOnly = false }) => {
     const handleContinueToSummary = (e) => {
         e.preventDefault();
 
-        let price, capacity, duration;
-        if (selectedService.hasTankSize) {
-            if (!tankSize) {
-                toast.error("Please select a tank size.");
-                return;
-            }
-            price = selectedService.tankOptions[tankSize]?.price;
-            capacity = selectedService.tankOptions[tankSize]?.capacity; 
-            duration = selectedService.tankOptions[tankSize]?.duration; 
-        } else {
-            price = selectedService.fixedPrice;
-            capacity = null;
-            duration = selectedService.fixedDuration;
-        }
+        const price = selectedService.price;
+        const duration = selectedService.duration;
+
 
         setBookingSummary({
             ...formData,
             service: selectedService,
-            tankSize: selectedService.hasTankSize ? tankSize : null,
             price,
-            capacity,
             duration
         });
 
         toast.success('Proceed to payment');
         setStep(2);
-    };
+    };  
 
     const fetchAvailableTimes = async (selectedDate) => {
         try{
@@ -136,25 +107,9 @@ const Services = ({ showHomeOnly = false }) => {
         }
     };
 
-    //const isBlockedDate = (date) => {
-    //    const formatted = format(date, 'yyyy-MM-dd');
-    //    return blockedDates.includes(formatted);
-    //};
-
-    //const getBlockedReason = (date) => {
-    //    const formatted = format(date, 'yyyy-MM-dd');
-    //    const match = blockedDatesInfo.find(d => d.date === formatted);
-    //    return match ? match.reason : '';
-    //};
-
     const handleDateChange = (date) => {
         const formatted = format(date, 'yyyy-MM-dd');
-        const blocked = blockedDatesInfo.find(d => d.date === formatted);
 
-        if(blocked){
-            toast.error(`This date is unavailable: ${blocked.reason}`);
-            return;
-        }
         setFormData(prev => ({ ...prev, date: formatted }));
         fetchAvailableTimes(formatted);
     };
@@ -168,14 +123,10 @@ const Services = ({ showHomeOnly = false }) => {
                 date: formData.date,
                 time: formData.time,
                 serviceType: selectedService._id,
-                tankSize: selectedService.hasTankSize ? tankSize : null,
-                capacity: bookingSummary.capacity,
+                price: bookingSummary.price,
+                duration: selectedService.duration,
                 paymentMethod,
-                price: bookingSummary.price,     
-                duration: selectedService.hasTankSize 
-                ? selectedService.tankOptions[tankSize]?.duration 
-                : selectedService.fixedDuration,
-                    notes: formData.notes,   
+                notes: formData.notes,   
             }, { withCredentials: true });
             toast.success(response.data.message);
             resetBookingForm();
@@ -218,24 +169,7 @@ const Services = ({ showHomeOnly = false }) => {
     };
 
     const getServicePrice = (service) => {
-        if (service.hasTankSize) {
-            const sizes = Object.values(service.tankOptions || {})
-            .filter(s => s?.price !== undefined); // only valid prices
-
-            if (sizes.length === 0) return '';
-
-            const prices = sizes.map(s => s.price);
-            const minPrice = Math.min(...prices);
-            const maxPrice = Math.max(...prices);
-
-            // if all prices are equal, just return single value
-            return minPrice === maxPrice
-            ? formatCurrency(minPrice)
-            : `${formatCurrency(minPrice)} - ${formatCurrency(maxPrice)}`;
-        }
-
-        // fallback: fixed price
-        return service.fixedPrice ? formatCurrency(service.fixedPrice) : '';
+        return service.price ? formatCurrency(service.price) : '';
     };
 
 

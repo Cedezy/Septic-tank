@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import HeaderAdmin from "../../components/HeaderAdmin";
 import SidebarAdmin from "../../components/SidebarAdmin";
 import Slider from "react-slick";
-import axios from "../../api/axios";
-import { Image, FolderPlus, ChevronLeft, ChevronRight } from "lucide-react";
+import axios from "../../lib/axios";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
