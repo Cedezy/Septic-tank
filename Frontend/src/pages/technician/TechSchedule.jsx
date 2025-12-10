@@ -256,7 +256,7 @@ const TechSchedule = () => {
                                 <p className="text-gray-600 text-sm">View and manage your service schedules.</p>
                             </div>
                         </div>
-                        <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center px-4 md:px-0">
+                        <div className="flex flex-col md:flex-row gap-3 md:gap-2 items-stretch md:items-center px-4 md:px-0">
                             <div className="relative flex items-center">
                                 <span className="absolute -top-2 left-2 bg-white px-2 text-xs text-gray-600">Search by</span>
                                 <select
@@ -271,7 +271,7 @@ const TechSchedule = () => {
                                     <option value="date">Date</option> 
                                 </select>
                             </div>
-
+                            
                             {filterType === "all" && (
                                 <div className="relative w-full md:w-auto">
                                     <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -490,7 +490,7 @@ const TechSchedule = () => {
                                         />
                                     </div>
                                 </div>  
-                            )}
+                            )}           
 
                             {(filterType === "name" ||
                                 filterType === "all" ||
@@ -499,7 +499,7 @@ const TechSchedule = () => {
                                 filterType === "date") && (
                                 <button
                                     onClick={handleSearch}
-                                    className="w-full px-5 py-2 bg-green-600 text-white rounded-sm cursor-pointer hover:bg-green-700 focus:ring-2 focus:ring-green-400 flex justify-center items-center gap-1 ease-in-out duration-300"
+                                    className="w-full md:w-[100px] px-5 py-2 bg-green-600 text-white rounded-sm cursor-pointer hover:bg-green-700 focus:ring-2 focus:ring-green-400 flex justify-center items-center gap-1 ease-in-out duration-300"
                                 >
                                     <Search className="w-4 h-4" />
                                     Search
@@ -507,7 +507,7 @@ const TechSchedule = () => {
                             )}
                         </div>
                                                
-                        <div className="bg-white rounded-sm shadow-sm border border-gray-200 max-h-[500px] overflow-auto">
+                        <div className="bg-white rounded-sm shadow-sm border border-gray-200 overflow-auto">
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50 sticky top-0 z-10">
                                     <tr>
