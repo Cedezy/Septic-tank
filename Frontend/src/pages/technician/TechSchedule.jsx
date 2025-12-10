@@ -212,8 +212,6 @@ const TechSchedule = () => {
         return new Date(date).setHours(0,0,0,0) > today.setHours(0,0,0,0);
     };
 
-    
-
     const handleProofUpload = async () => {
         if(proofFiles.length === 0) {
             toast.warning("Please upload at least one proof image.");
@@ -243,7 +241,6 @@ const TechSchedule = () => {
         }
     };
 
-
     const formatHours = (hrs) => {
         return `${hrs} hour${hrs > 1 ? "s" : ""}`;
     };
@@ -260,7 +257,6 @@ const TechSchedule = () => {
                             </div>
                         </div>
                         <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center px-4 md:px-0">
-                            {/* Search By Dropdown */}
                             <div className="relative flex items-center">
                                 <span className="absolute -top-2 left-2 bg-white px-2 text-xs text-gray-600">Search by</span>
                                 <select
@@ -276,7 +272,6 @@ const TechSchedule = () => {
                                 </select>
                             </div>
 
-                            {/* All Filter */}
                             {filterType === "all" && (
                                 <div className="relative w-full md:w-auto">
                                     <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -293,7 +288,6 @@ const TechSchedule = () => {
                                 </div>
                             )}
 
-                            {/* Customer Name Filter */}
                             {filterType === "name" && (
                                 <div className="relative w-full md:w-auto">
                                     <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -310,7 +304,6 @@ const TechSchedule = () => {
                                 </div>
                             )}
 
-                            {/* Remarks Filter */}
                             {filterType === "remarks" && (
                                 <div className="flex flex-col md:flex-row gap-2 z-20 w-full md:w-auto">
                                     <div className="relative w-full md:w-[200px]">
@@ -336,8 +329,11 @@ const TechSchedule = () => {
                                                         key={opt}
                                                         onClick={() => {
                                                             setSearch(opt);
+                                                            setStartDate(null);
+                                                            setEndDate(null);
                                                             setShowRemarksDropdown(false);
                                                         }}
+
                                                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                                                     >
                                                         {opt}
@@ -347,7 +343,6 @@ const TechSchedule = () => {
                                         )}
                                     </div>
 
-                                    {/* Date Range for Remarks */}
                                     <div className="flex flex-col sm:flex-row gap-2">
                                         <div className="relative flex items-center flex-1 md:flex-initial">
                                             <span className="absolute left-3 text-gray-400 pointer-events-none">
@@ -385,7 +380,6 @@ const TechSchedule = () => {
                                 </div>
                             )}
 
-                            {/* Service Type Filter */}
                             {filterType === "serviceType" && (
                                 <div className="flex flex-col md:flex-row gap-2 z-20 w-full md:w-auto">
                                     <div className="relative w-full md:w-[300px]">
@@ -411,6 +405,8 @@ const TechSchedule = () => {
                                                         key={service._id}
                                                         onClick={() => {
                                                             setSearch(service.name);
+                                                            setStartDate(null); 
+                                                            setEndDate(null);   
                                                             setShowServiceDropdown(false);
                                                         }}
                                                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -422,7 +418,6 @@ const TechSchedule = () => {
                                         )}
                                     </div>
 
-                                    {/* Date Range for Service Type */}
                                     <div className="flex flex-col sm:flex-row gap-2">
                                         <div className="relative flex items-center flex-1 md:flex-initial">
                                             <span className="absolute left-3 text-gray-400 pointer-events-none">
@@ -460,7 +455,6 @@ const TechSchedule = () => {
                                 </div>
                             )}
 
-                            {/* Date Filter */}
                             {filterType === "date" && (
                                 <div className="flex flex-col sm:flex-row gap-2 z-20">
                                     <div className="relative flex items-center flex-1">
@@ -498,7 +492,6 @@ const TechSchedule = () => {
                                 </div>  
                             )}
 
-                            {/* Search Button */}
                             {(filterType === "name" ||
                                 filterType === "all" ||
                                 filterType === "remarks" ||
