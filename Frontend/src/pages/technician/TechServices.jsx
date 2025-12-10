@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../../lib/axios';
 import SidebarTech from '../../components/SidebarTech';
-import HeaderAdmin from '../../components/HeaderAdmin';
 import { formatCurrency } from '../../utils/FormatCurrency';
-import { ClipboardList, AlertTriangle, Eye } from "lucide-react";
-import { Package, X, Image, Search, Images } from 'lucide-react';
+import { Image } from 'lucide-react';
 
 const BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
 const TechServices = () => {
-    const [isCollapsed, setIsCollapsed] = useState(false);
     const [services, setServices] = useState([]);
 
     useEffect(() => {

@@ -3,16 +3,13 @@ import axios from '../../lib/axios';
 import SidebarManager from '../../components/SidebarManager';
 import HeaderAdmin from '../../components/HeaderAdmin';
 import { formatCurrency } from '../../utils/FormatCurrency';
-import { ClipboardList, AlertTriangle, Eye } from "lucide-react";
-import { Package, X, Image, Search, Images } from 'lucide-react';
+import { Image } from 'lucide-react';
 
 const BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
 const ManagerServices1 = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [services, setServices] = useState([]);
-    const [showImageModal, setShowImageModal] = useState(false);
-    const [imageService, setImageService] = useState(null);
 
     useEffect(() => {
         fetchServices();

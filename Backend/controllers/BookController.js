@@ -8,11 +8,11 @@ exports.createBooking = async (req, res) => {
         const { date, time, serviceType, paymentMethod, notes } = req.body;
         const customerId = req.user._id;
 
-        console.log('Booking request:', { date, time, serviceType, paymentMethod, notes, customerId });
-
-        const existingBooking = await Booking.findOne({ customerId, date, time });
-        if(existingBooking){
-            return res.status(400).json({ success: false, message: 'You already have a booking at this time.' });
+         if(!date || !time){
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Date and time are required!' 
+            });
         }
 
         const service = await ServiceType.findById(serviceType);
@@ -23,9 +23,6 @@ exports.createBooking = async (req, res) => {
 
         let price = service.price;
         let duration = service.duration;
-
-
-        console.log('Service details:', { price, duration });
 
         const booking = await Booking.create({
             customerId,
@@ -399,7 +396,7 @@ exports.getAvailableTimeSlots = async (req, res) => {
             return res.status(400).json({ message: 'Date is required', success: false });
         }
 
-        const allSlots = ['08:00 AM','09:00 AM','10:00 AM','01:00 PM','02:00 PM','03:00 PM','04:00 PM'];
+        const allSlots = ['08:00 AM','09:00 AM','10:00 AM','11:00 AM','01:00 PM','02:00 PM','03:00 PM','04:00 PM'];
 
         const technicians = await User.find({ role: 'technician', isActive: true });
         const totalTechnicians = technicians.length;

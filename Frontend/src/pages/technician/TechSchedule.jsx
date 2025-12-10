@@ -5,8 +5,6 @@ import { toast } from 'react-toastify';
 import { formatDate, shortFormatDate } from '../../utils/FormatDate';
 import { formatCurrency } from '../../utils/FormatCurrency';
 import { getStatusBadge } from '../../utils/BookingStats';
-import { ClipboardList, Mail, Phone, CalendarDays, MapPin, Eye, X } from 'lucide-react';
-import { Search, FileWarning } from 'lucide-react'
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import {
@@ -14,20 +12,20 @@ import {
   User,
   Building2,
   Clock,
-  Package,
-  Image,
   Calendar,
   StickyNote,
   XCircle,
-  ChevronLeft,
   ChevronDown,
-  Printer 
-} from "lucide-react";
-import { Wrench, HeartPulse } from "lucide-react";
-import { AlertCircle, CheckCircle } from 'lucide-react';
-import { EllipsisVertical } from "lucide-react";
-import {
+  Printer,
+  Wrench,
+  HeartPulse,
+  AlertCircle,
   Briefcase,
+  Phone, 
+  MapPin, 
+  X,
+  Search, 
+  FileWarning
 } from "lucide-react";
 import logo from '../../assets/logo.png'
 const BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
@@ -209,27 +207,6 @@ const TechSchedule = () => {
         setFilteredBookings(bookings);
     }, [filterType, bookings]);
 
-
-    const isToday = (dateStr) => {
-        const today = new Date();
-        const bookingDate = new Date(dateStr);
-        return (
-            today.getFullYear() === bookingDate.getFullYear() &&
-            today.getMonth() === bookingDate.getMonth() &&
-            today.getDate() === bookingDate.getDate()
-        );
-    };
-
-    const isPastDate = (dateStr) => {
-        const today = new Date();
-        const bookingDate = new Date(dateStr);
-
-        today.setHours(0, 0, 0, 0);
-        bookingDate.setHours(0, 0, 0, 0);
-
-        return bookingDate < today; 
-    };
-
     const isFutureDate = (date) => {
         const today = new Date();
         return new Date(date).setHours(0,0,0,0) > today.setHours(0,0,0,0);
@@ -270,7 +247,6 @@ const TechSchedule = () => {
     const formatHours = (hrs) => {
         return `${hrs} hour${hrs > 1 ? "s" : ""}`;
     };
-
 
     return (
         <SidebarTech>

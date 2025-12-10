@@ -292,7 +292,7 @@ const AdminCustomer = () => {
 
                 {showModal && selectedUser && (
                     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-                        <div className="bg-white rounded-sm shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden animate-fade-in">
+                        <div className="bg-white rounded-sm shadow-2xl w-full max-w-7xl max-h-[90vh] overflow-hidden animate-fade-in">
                             <div className="bg-gradient-to-r from-green-600 to-green-500 px-6 py-5 flex items-center gap-3 sticky top-0 z-10 shadow-md">
                                 <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
                                     <Users className="w-6 h-6 text-white" />
@@ -331,7 +331,7 @@ const AdminCustomer = () => {
                                         </div>
                                         <div className="grid grid-cols-[140px_1fr] py-3.5 border-b border-gray-200">
                                             <span className="text-sm font-medium text-gray-600">Sex</span>
-                                            <span className="text-sm text-gray-900 font-medium">Male</span>
+                                            <span className="text-sm text-gray-900 font-medium capitalize">{selectedUser.phone || 'not set'}</span>
                                         </div>
 
                                         <div className="grid grid-cols-[140px_1fr] py-3.5 border-b border-gray-200">

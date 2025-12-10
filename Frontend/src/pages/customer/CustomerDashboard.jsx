@@ -2,12 +2,21 @@ import React, { useState, useEffect } from 'react';
 import axios from '../../lib/axios';
 import Header from '../../components/Header'
 import { toast } from 'react-toastify';
-import {
-    Mail, User, Lock, ShieldCheck,
-    Settings, Edit, Phone, MapPin, Calendar, X
-} from 'lucide-react';
-import { Eye, EyeOff } from "lucide-react";
 import { formatDate } from '../../utils/FormatDate';
+import {
+    Mail, 
+    User, 
+    Lock, 
+    ShieldCheck, 
+    Edit,
+    Phone,
+    MapPin, 
+    Calendar, 
+    X,
+    Eye, 
+    EyeOff
+} from 'lucide-react';
+
 const CustomerDashboard = () => {
     const [customerId, setCustomerId] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,7 +42,6 @@ const CustomerDashboard = () => {
         new: false,
         confirm: false
     });
-
 
     useEffect(() => {
         const fetchCustomer = async () => {
@@ -148,7 +156,7 @@ const CustomerDashboard = () => {
     return (
          <div className="min-h-screen bg-gray-50 pt-18">
             <Header />
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="max-w-6xl mx-auto px-2 md:px-4 sm:px-6 lg:px-8 py-8">
                 
                 <div className="mb-6">
                     <div className="flex items-center space-x-4 mb-4">
@@ -167,7 +175,7 @@ const CustomerDashboard = () => {
                             </div>
                             <button
                                 onClick={() => setShowEditModal(true)}
-                                className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-sm cursor-pointer ease-in-out duration-300 shadow-lg hover:shadow-xl"
+                                className="inline-flex items-center px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-medium rounded-sm cursor-pointer ease-in-out duration-300"
                             >
                                
                                 Edit 
@@ -252,7 +260,7 @@ const CustomerDashboard = () => {
                             </div>
                             <button
                                 onClick={() => setShowPasswordModal(true)}
-                                className="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md cursor-pointer transition-colors duration-200 shadow-lg hover:shadow-xl"
+                                className="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md cursor-pointer transition-colors duration-200"
                             >
                                
                                 Change Password
@@ -277,7 +285,7 @@ const CustomerDashboard = () => {
             </div>
 
             {showEditModal && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
+                <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-1">
                     <div className="bg-white rounded-sm shadow-2xl w-full max-w-3xl animate-fade-in mx-auto flex flex-col max-h-[90vh] overflow-hidden">
                         <div className="bg-green-600 px-6 py-4 flex-shrink-0">
                             <div className="flex items-center justify-between">
@@ -424,7 +432,7 @@ const CustomerDashboard = () => {
 
             {/* Change Password Modal */}
             {showPasswordModal && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
+                <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-2">
                     <div className="bg-white rounded-sm shadow-xl w-full max-w-md animate-fade-in mx-auto flex flex-col max-h-[90vh] overflow-hidden">
                         <div className="bg-green-600 px-6 py-4 flex-shrink-0">
                             <div className="flex items-center justify-between">

@@ -265,7 +265,7 @@ const AdminUser = () => {
                                                 <td className="px-4 py-4 text-sm text-gray-800">
                                                     {idx + 1}
                                                 </td>
-                                                <td className="px-4 py-6 text-sm text-gray-900">       
+                                                <td className="px-4 py-6 text-sm text-gray-900 whitespace-nowrap">       
                                                     {user.fullname}
                                                 </td>
                                                 <td className="px-4 py-4 text-sm text-gray-900">

@@ -8,8 +8,14 @@ import { Link } from 'react-router-dom';
 import { formatCurrency } from '../../utils/FormatCurrency';
 import logo from '../../assets/logo.png';
 import { 
-    Clock, CheckCircle, AlertCircle, Calendar, MapPin, Phone, Timer, CalendarDays,
-    StickyNote, Cylinder, Wrench, Images, Printer
+    Clock, 
+    CheckCircle, 
+    AlertCircle, 
+    Calendar, 
+    Phone, 
+    CalendarDays, 
+    Wrench, 
+    Printer
 } from 'lucide-react';
 
 const BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
@@ -22,7 +28,7 @@ const CustomerBooking = () => {
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [showProofViewModal, setShowProofViewModal] = useState(false);
     const [proofImages, setProofImages] = useState([]);
-    const [activeTab, setActiveTab] = useState("bookings"); // 'bookings' | 'transactions'
+    const [activeTab, setActiveTab] = useState("bookings"); 
 
     const fetchBookings = async () => {
         try {
@@ -213,24 +219,24 @@ const CustomerBooking = () => {
                                             <Phone className="w-4 h-4 text-gray-400" />
                                             <div>
                                                 <p className="text-sm font-medium text-gray-900">Technician Number</p>
-                                                <p className="text-sm text-gray-600">{booking?.technicianId?.phone || 'N/A'}</p>
+                                                <p className="text-sm text-gray-600">{booking?.technicianId?.phone || 'Not Assigned'}</p>
                                             </div>
                                         </div>
                                     </div>
-                                    {/* Cancel Button (only if pending) */}
-{booking.status === "pending" && (
-    <div className="px-6 pb-6 flex justify-end">
-        <button
-            onClick={() => {
-                setSelectedBooking(booking);
-                setShowCancelModal(true);
-            }}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-sm text-sm font-medium shadow-sm transition-colors"
-        >
-            Cancel Booking
-        </button>
-    </div>
-)}
+                                 
+                                    {booking.status === "pending" && (
+                                        <div className="px-6 pb-6 flex justify-end">
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedBooking(booking);
+                                                    setShowCancelModal(true);
+                                                }}
+                                                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-sm text-sm font-medium shadow-sm ease-in-out duration-300 cursor-pointer"
+                                            >
+                                                Cancel Booking
+                                            </button>
+                                        </div>
+                                    )}
 
                                 </div>
                             ))}
@@ -281,7 +287,7 @@ const CustomerBooking = () => {
 
             {showProofViewModal && selectedBooking && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-                    <div className="bg-white shadow-2xl rounded-sm w-full max-w-full md:max-w-xl animate-fade-in flex flex-col h-full md:h-auto overflow-hidden">
+                    <div className="bg-white shadow-2xl rounded-sm w-full max-w-full md:max-w-xl md:h-[90vh] animate-fade-in flex flex-col h-full overflow-hidden">
                         <div className="bg-white px-8 py-6 border-b-2 border-dashed border-gray-300 flex-shrink-0">
                             <div className="text-center mb-4">
                                 <div className="flex justify-center mb-3">

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import SidebarTech from '../../components/SidebarTech';
 import axios from '../../lib/axios';
-import { Info, Building2, ChevronLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Info, Building2 } from 'lucide-react';
 
 const TechAbout = () => {
     const [aboutData, setAboutData] = useState(null);

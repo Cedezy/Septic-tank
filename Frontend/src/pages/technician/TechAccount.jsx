@@ -2,13 +2,20 @@ import React, { useState, useEffect } from 'react';
 import SidebarTech from '../../components/SidebarTech';
 import axios from '../../lib/axios';
 import { toast } from 'react-toastify';
-import {
-    Mail, User, Lock, ShieldCheck,
-    Settings, Edit, Phone, MapPin, Calendar, X, ChevronLeft
-} from 'lucide-react';
-import { Eye, EyeOff } from "lucide-react";
 import { formatDate } from '../../utils/FormatDate';
-import { Link } from 'react-router-dom';
+import {
+    Mail, 
+    User, 
+    Lock, 
+    ShieldCheck, 
+    Edit, 
+    Phone, 
+    MapPin, 
+    Calendar, 
+    X,  
+    Eye, 
+    EyeOff 
+} from 'lucide-react';
 
 const TechAccount = () => {
     const [customerId, setCustomerId] = useState(null);

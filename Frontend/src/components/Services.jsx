@@ -31,6 +31,8 @@ const Services = ({ showHomeOnly = false }) => {
     });
     const [showDropdown, setShowDropdown] = useState(false);
 
+    const allTimeSlots = ['08:00 AM','09:00 AM','10:00 AM','11:00 AM','01:00 PM','02:00 PM','03:00 PM','04:00 PM'];
+
     const handleScheduleClick = (service) => {
         if(!currentUser) {
             navigate('/signup');
@@ -77,24 +79,6 @@ const Services = ({ showHomeOnly = false }) => {
         }
     };
 
-    const handleContinueToSummary = (e) => {
-        e.preventDefault();
-
-        const price = selectedService.price;
-        const duration = selectedService.duration;
-
-
-        setBookingSummary({
-            ...formData,
-            service: selectedService,
-            price,
-            duration
-        });
-
-        toast.success('Proceed to payment');
-        setStep(2);
-    };  
-
     const fetchAvailableTimes = async (selectedDate) => {
         try{
             const response = await axios.get(`/book/available-time?date=${selectedDate}`, {
@@ -109,10 +93,31 @@ const Services = ({ showHomeOnly = false }) => {
 
     const handleDateChange = (date) => {
         const formatted = format(date, 'yyyy-MM-dd');
-
-        setFormData(prev => ({ ...prev, date: formatted }));
+        setFormData(prev => ({ ...prev, date: formatted, time: '' })); 
         fetchAvailableTimes(formatted);
     };
+
+    const handleContinueToSummary = (e) => {
+        e.preventDefault();
+
+        if(!formData.date || !formData.time){
+            toast.error("Please select both date and time before proceeding.");
+            return;
+        }
+
+        const price = selectedService.price;
+        const duration = selectedService.duration;
+
+        setBookingSummary({
+            ...formData,
+            service: selectedService,
+            price,
+            duration
+        });
+
+        toast.success('Proceed to payment');
+        setStep(2);
+    };  
 
     const handlePaymentConfirmation = async () => {
         if(!paymentMethod) return;
@@ -185,14 +190,7 @@ const Services = ({ showHomeOnly = false }) => {
         <div className='bg-gray-50 pt-28'>
             <div className="pb-10">
                 <div className="max-w-4xl mx-auto text-center space-y-4">
-                     <button 
-                        type="button"
-                        onClick={() => navigate(-1)}
-                        className="text-gray-600 hover:text-gray-800 flex items-center gap-1 ml-6"
-                        >
-                        <span className="text-xl">←</span>
-                        <span className="text-md font-medium">Back</span>
-                    </button>
+               
                     <h1 className="text-4xl md:text-5xl text-gray-800 mb-6 uppercase tracking-tight">
                         Plan Your Septic Service
                     </h1>
@@ -275,7 +273,7 @@ const Services = ({ showHomeOnly = false }) => {
             </div>
 
             {selectedService && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+                <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-1">
                     <div className="bg-white rounded-sm shadow-2xl w-full max-w-2xl animate-fade-in mx-auto flex flex-col max-h-[90vh] overflow-hidden">
                         {step === 1 ? (
                             <>
@@ -292,7 +290,7 @@ const Services = ({ showHomeOnly = false }) => {
                                         </div>
                                        <button
                                             type="button"
-                                            onClick={() => setSelectedService(null)}
+                                            onClick={() => resetBookingForm()}
                                             className="text-gray-300 hover:text-white hover:bg-green-500 rounded-full p-2 transition-all duration-200 cursor-pointer"
                                             >
                                             <X className="w-5 h-5" />
@@ -302,7 +300,6 @@ const Services = ({ showHomeOnly = false }) => {
 
                                 <div className="px-6 py-6 overflow-y-auto flex-1">
                                     <form onSubmit={handleContinueToSummary} className="space-y-5">
-                                        {/* Service Information */}
                                         <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-5">
                                             <div className="flex items-center space-x-3">
                                                 <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
@@ -335,60 +332,107 @@ const Services = ({ showHomeOnly = false }) => {
                                                             name="date"
                                                             value={formData.date}
                                                             onChange={(e) => handleDateChange(new Date(e.target.value))}
-                                                           
+                                                            min={new Date().toISOString().split("T")[0]}
                                                             className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 text-sm"
                                                         />
                                                     </div>
-                                                    <p className="text-xs text-gray-500 mt-1">Choose your preferred service date</p>
+                                                    <p className="text-xs text-gray-500 mt-1">
+                                                        Choose your preferred service date
+                                                    </p>
                                                 </div>
-                                                {/* Time Picker Trigger */}
-                                                    <div className="relative w-full">
+
+                                                <div className="relative w-full">
                                                     <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
                                                         Time <span className="text-red-500 ml-1">*</span>
                                                     </label>
                                                     <div
-                                                        className="w-full border-2 border-gray-200 rounded-lg py-3 px-4 cursor-pointer relative"
-                                                        onClick={() => setShowDropdown(true)}
+                                                        className={`w-full border-2 border-gray-200 rounded-lg py-3 px-4 relative cursor-pointer ${
+                                                            !formData.date ? 'bg-gray-100 cursor-not-allowed' : ''
+                                                        }`}
+                                                        onClick={() => {
+                                                            if (formData.date) setShowDropdown(true);
+                                                        }}
                                                     >
                                                         {formData.time || "Select time..."}
                                                     </div>
+                                                </div>
+
+                                                {showDropdown && (
+                                                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 animate-in fade-in duration-200">
+                                                        <div 
+                                                            className="bg-white rounded-sm animate-fade-in w-full max-w-md shadow-2xl transform transition-all animate-in zoom-in-95 duration-200"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            {/* Header */}
+                                                            <div className="flex justify-between items-center px-6 py-5 border-b border-gray-100">
+                                                                <div>
+                                                                    <h3 className="text-xl font-semibold text-gray-900">Select Time</h3>
+                                                                    <p className="text-sm text-gray-500 mt-0.5">Choose your preferred time slot</p>
+                                                                </div>
+                                                                <button 
+                                                                    onClick={() => setShowDropdown(false)}
+                                                                    className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2 transition-colors"
+                                                                    aria-label="Close modal"
+                                                                >
+                                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                                    </svg>
+                                                                </button>
+                                                            </div>
+
+                                                            {/* Time Slots */}
+                                                            <div className="p-4 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                                                                <div className="grid grid-cols-2 gap-2">
+                                                                    {allTimeSlots.map((slot) => {
+                                                                        const isDisabled = !availableTimeSlots.includes(slot);
+                                                                        const isSelected = formData.time === slot;
+
+                                                                        return (
+                                                                            <button
+                                                                                key={slot}
+                                                                                onClick={() => {
+                                                                                    if (!isDisabled) {
+                                                                                        setFormData({ ...formData, time: slot });
+                                                                                        setShowDropdown(false);
+                                                                                    }
+                                                                                }}
+                                                                                disabled={isDisabled}
+                                                                                className={`
+                                                                                    relative py-3.5 px-4 rounded-xl text-sm font-medium 
+                                                                                    transition-all duration-200 ease-in-out
+                                                                                    ${isDisabled
+                                                                                        ? 'bg-gray-50 text-gray-300 cursor-not-allowed opacity-50'
+                                                                                        : isSelected
+                                                                                            ? 'bg-blue-600 text-white shadow-md shadow-blue-200 scale-105'
+                                                                                            : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50 hover:scale-102 active:scale-98'
+                                                                                    }
+                                                                                `}
+                                                                            >
+                                                                                <span className="relative z-10">{slot}</span>
+                                                                                {isSelected && (
+                                                                                    <div className="absolute top-1 right-1">
+                                                                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                                                        </svg>
+                                                                                    </div>
+                                                                                )}
+                                                                            </button>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Footer hint */}
+                                                            <div className="px-6 py-4 bg-gray-50 rounded-b-2xl border-t border-gray-100">
+                                                                <p className="text-xs text-gray-500 text-center">
+                                                                    Unavailable slots are shown in gray
+                                                                </p>
+                                                            </div>
+                                                        </div>
                                                     </div>
-
-                                                    {/* Time Selection Modal */}
-                                                    {showDropdown && (
-                                                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                                                        <div className="bg-white rounded-lg w-full max-w-md p-4">
-                                                        <div className="flex justify-between items-center mb-4">
-                                                            <h3 className="text-lg font-semibold">Select Time</h3>
-                                                            <button
-                                                            onClick={() => setShowDropdown(false)}
-                                                            className="text-gray-500 hover:text-gray-700"
-                                                            >
-                                                            ✕
-                                                            </button>
-                                                        </div>
-
-                                                        <div className="flex flex-col gap-1 max-h-80 overflow-y-auto">
-                                                            {availableTimeSlots.map((slot) => (
-                                                            <button
-                                                                key={slot}
-                                                                onClick={() => {
-                                                                setFormData({ ...formData, time: slot });
-                                                                setShowDropdown(false);
-                                                                }}
-                                                                className="w-full border py-3 px-4 bg-gray-50 text-slate-900 rounded-lg hover:bg-gray-100 transition-all text-center font-medium"
-                                                            >
-                                                                {slot}
-                                                            </button>
-                                                            ))}
-                                                        </div>
-                                                        </div>
-                                                    </div>
-                                                    )}
-
-
-
+                                                )}
                                             </div>
+
                                         </div>
                                         <div className="mt-4">
                                             <label className="block text-sm font-medium text-gray-700">
@@ -414,7 +458,7 @@ const Services = ({ showHomeOnly = false }) => {
                                         <div className="flex space-x-2">
                                             <button 
                                                 type="button" 
-                                                onClick={() => setSelectedService(null)} 
+                                                onClick={() => resetBookingForm()}
                                                 className="px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all duration-200 font-medium cursor-pointer text-sm"
                                             >
                                                 Cancel
@@ -437,7 +481,7 @@ const Services = ({ showHomeOnly = false }) => {
                             </>
                         ) : (
                             <>
-                                <div className="bg-green-600 px-6 py-4 flex-shrink-0">
+                                <div className="bg-green-600 p-4 flex-shrink-0">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center space-x-3">
                                             <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
@@ -450,7 +494,7 @@ const Services = ({ showHomeOnly = false }) => {
                                         </div>
                                         <button
                                             type="button"
-                                            onClick={() => setSelectedService(null)}
+                                            onClick={() => resetBookingForm()}
                                             className="text-gray-300 hover:text-white hover:bg-green-500 rounded-full p-2 transition-all duration-200 cursor-pointer">
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -459,8 +503,8 @@ const Services = ({ showHomeOnly = false }) => {
                                     </div>
                                 </div>
 
-                                <div className="px-6 py-6 overflow-y-auto flex-1">
-                                    <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden mb-6">
+                                <div className="p-2 overflow-y-auto flex-1">
+                                    <div className="bg-white rounded-sm border-2 border-gray-200 overflow-hidden mb-6">
                                         <div className="bg-gradient-to-r from-gray-50 to-gray-100/50 px-4 py-3 border-b border-gray-200">
                                             <h4 className="font-semibold text-gray-900">Booking Summary</h4>
                                             <p className="text-sm text-gray-500">Please review your service details</p>

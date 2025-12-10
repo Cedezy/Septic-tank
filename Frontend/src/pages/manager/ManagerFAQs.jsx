@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from '../../lib/axios';
 import SidebarManager from '../../components/SidebarManager';
 import HeaderAdmin from '../../components/HeaderAdmin';
-import { HelpCircle, Search, AlertTriangle, X } from 'lucide-react';
+import { HelpCircle } from 'lucide-react';
 import { formatDate } from '../../utils/FormatDate'
 
 const ManagerFAQs = () => {

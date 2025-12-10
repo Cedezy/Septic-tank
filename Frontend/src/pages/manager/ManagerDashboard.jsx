@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import HeaderAdmin from "../../components/HeaderAdmin";
 import SidebarManager from "../../components/SidebarManager";
-import Slider from "react-slick";
-import { Image, FolderPlus, ChevronLeft, ChevronRight } from "lucide-react";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 

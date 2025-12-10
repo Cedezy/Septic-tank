@@ -4,7 +4,7 @@ import HeaderAdmin from '../../components/HeaderAdmin';
 import axios from '../../lib/axios';
 import { formatDate, shortFormatDate } from '../../utils/FormatDate';
 import { formatCurrency } from '../../utils/FormatCurrency';
-import { Search, UserX, CalendarDays, Printer, Users, FileText } from 'lucide-react';
+import { Search, UserX, CalendarDays, Printer, Users } from 'lucide-react';
 import { getStatusBadge } from '../../utils/BookingStats';
 import logo from '../../assets/logo.png'
 import { useRef } from 'react';
@@ -331,8 +331,8 @@ const ManagerCustomer = () => {
                                             <span className="text-sm text-gray-900 font-medium">{formatDate(selectedUser.birthdate)}</span>
                                         </div>
                                         <div className="grid grid-cols-[140px_1fr] py-3.5 border-b border-gray-200">
-                                            <span className="text-sm font-medium text-gray-600">Gender</span>
-                                            <span className="text-sm text-gray-900 font-medium">Male</span>
+                                            <span className="text-sm font-medium text-gray-600">Sex</span>
+                                            <span className="text-sm text-gray-900 font-medium capitalize">{selectedUser.gender || 'Not set'}</span>
                                         </div>
 
                                         <div className="grid grid-cols-[140px_1fr] py-3.5 border-b border-gray-200">

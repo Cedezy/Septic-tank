@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import SidebarManager from '../../components/SidebarManager';
 import HeaderAdmin from '../../components/HeaderAdmin';
 import axios from '../../lib/axios';
-import { Info, Building2 } from 'lucide-react';
 
 const ManagerAbout = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);

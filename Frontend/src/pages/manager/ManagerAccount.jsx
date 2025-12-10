@@ -3,12 +3,21 @@ import SidebarManager from '../../components/SidebarManager';
 import HeaderAdmin from '../../components/HeaderAdmin';
 import axios from '../../lib/axios';
 import { toast } from 'react-toastify';
-import {
-    Mail, User, Lock, ShieldCheck,
-    Settings, Edit, Phone, MapPin, Calendar, X
-} from 'lucide-react';
-import { Eye, EyeOff } from "lucide-react";
 import { formatDate } from '../../utils/FormatDate';
+import {
+    Mail, 
+    User, 
+    Lock, 
+    ShieldCheck,
+    Settings, 
+    Edit, 
+    Phone, 
+    MapPin, 
+    Calendar, 
+    X,
+    Eye, 
+    EyeOff
+} from 'lucide-react';
 
 const ManagerAccount = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);

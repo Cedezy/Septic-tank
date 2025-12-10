@@ -72,7 +72,7 @@ const Header = () => {
                 <>
                   <button
                     onClick={() => setIslogout(true)}
-                    className="py-2 px-4 text-red-600 font-semibold hover:text-red-800 transition"
+                    className="py-2 px-4 cursor-pointer text-red-600 font-semibold hover:text-red-800 transition"
                   >
                     Logout
                   </button>
@@ -131,7 +131,7 @@ const Header = () => {
       {/* LOGOUT MODAL */}
       {islogout && (
         <div className="fixed inset-0 bg-black/30 flex justify-center items-center z-50">
-          <div className="bg-white p-8 rounded-md shadow-2xl max-w-md w-full mx-4">
+          <div className="bg-white p-8 rounded-md shadow-2xl max-w-md w-full mx-4 animate-fade-in">
             <div className="text-center">
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <LogOut className="w-8 h-8 text-red-600" />
@@ -143,7 +143,7 @@ const Header = () => {
             <div className="flex justify-center items-center gap-2">
               <button
                 onClick={() => setIslogout(false)}
-                className="py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-sm transition"
+                className="py-2 px-4 cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-sm transition"
               >
                 Cancel
               </button>
@@ -153,7 +153,7 @@ const Header = () => {
                   setIslogout(false);
                   navigate("/home");
                 }}
-                className="py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-sm transition"
+                className="py-2 cursor-pointer px-4 bg-red-600 hover:bg-red-700 text-white rounded-sm transition"
               >
                 Sign Out
               </button>

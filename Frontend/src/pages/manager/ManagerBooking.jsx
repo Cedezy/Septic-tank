@@ -7,31 +7,28 @@ import { toast } from 'react-toastify';
 import { formatDate, shortFormatDate } from '../../utils/FormatDate';
 import { formatCurrency } from '../../utils/FormatCurrency';
 import { getStatusBadge } from '../../utils/BookingStats';
-import { Search } from 'lucide-react';
-import { FileWarning } from 'lucide-react';
-import {  Users } from "lucide-react";
-import { CheckCircle, X } from 'lucide-react';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { AlertCircle, Image } from "lucide-react";
-import { ChevronDown } from "lucide-react";
+import { useRef } from 'react';
+import { handlePrint } from '../../utils/PrintUtils';
 import {
   FileText,
+  AlertCircle,
+  Search,
   User,
+  Users,
+  FileWarning,
   Phone,
   MapPin,
   Building2,
   Clock,
-  Package,
   Wrench,
   Calendar,
   StickyNote,
-  HelpCircle,
   Fingerprint,
-  Printer 
+  Printer,
+  ChevronDown
 } from "lucide-react";
-import { useRef } from 'react';
-import { handlePrint } from '../../utils/PrintUtils';
 
 const ManagerBooking = () => {
     const [isCollapsed, setIsCollapsed] = useState(false)

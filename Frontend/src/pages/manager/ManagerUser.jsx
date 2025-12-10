@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import SidebarManager from '../../components/SidebarManager';
 import HeaderAdmin from '../../components/HeaderAdmin';
 import axios from '../../lib/axios';
-import { Search, Printer, Calendar  } from 'lucide-react';
+import { Search, Printer, Calendar } from 'lucide-react';
 import { formatDate, shortFormatDate } from '../../utils/FormatDate';
 import { UserX, Users} from 'lucide-react';
 import { useRef } from 'react';
@@ -203,7 +203,7 @@ const ManagerUser = () => {
                             </div>
                         </div>
               
-                        <div ref={printRef} className="bg-white rounded-sm shadow-sm border border-gray-200 max-h-[500px] overflow-y-auto">
+                        <div ref={printRef} className="bg-white rounded-sm shadow-sm border border-gray-200 overflow-y-auto">
                             <h1 className="print-title hidden">List of Registered User</h1>
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50 sticky top-0 z-10">

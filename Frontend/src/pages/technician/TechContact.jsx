@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import SidebarTech from '../../components/SidebarTech';
 import axios from '../../lib/axios';
-import { Phone, Mail, MapPin, Facebook, Info, ChevronLeft } from 'lucide-react';
+import { Phone, Mail, MapPin, Facebook, Info } from 'lucide-react';
 
 const TechContact = () => {
     const [contactData, setContactData] = useState(null);
