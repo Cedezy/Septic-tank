@@ -105,12 +105,10 @@ const AdminServices = () => {
     return (
          <div className="h-screen flex overflow-hidden">
             <div className='w-full'>
-                <div className="mb-36">
-                    <HeaderAdmin />
-                </div>
+                <HeaderAdmin />
                 <SidebarAdmin isCollapsed={isCollapsed} toggleCollapse={() => setIsCollapsed(prev => !prev)} />
                 <div className={`flex-1 transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-72'} `}>
-                    <div className="p-6 h-[calc(100vh-120px)] overflow-y-auto">
+                   <div className='px-6 pb-4 flex flex-col gap-2 h-screen pt-40'>
                         <div className='flex justify-center items-center'>
                             <span className='text-2xl tracking-tighter uppercase font-medium text-gray-700'>
                                 Manage Services

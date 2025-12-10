@@ -104,10 +104,14 @@ const ManagerUser = () => {
         setFilteredUsers(results);
     };
 
-
-     useEffect(() => {
+    useEffect(() => {
         setSearch("");
         setFilteredUsers(users);
+
+        if (filterType !== "date") {
+            setStartDate("");
+            setEndDate("");
+        }
     }, [filterType, users]);
 
     return (
@@ -353,7 +357,7 @@ const ManagerUser = () => {
                                         
                                         <div className="grid grid-cols-3 gap-x-4 py-3 border-b border-gray-100">
                                             <span className="text-sm font-medium text-gray-500">Sex</span>
-                                            <span className="col-span-2 text-sm text-gray-900 capitalize">{selectedUser.gender || 'Male'}</span>
+                                            <span className="col-span-2 text-sm text-gray-900 capitalize">{selectedUser.gender || 'Not set'}</span>
                                         </div>
 
                                         <div className="grid grid-cols-3 gap-x-4 py-3">

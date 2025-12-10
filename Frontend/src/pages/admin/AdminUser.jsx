@@ -104,10 +104,16 @@ const AdminUser = () => {
         setFilteredUsers(results);
     };
 
-     useEffect(() => {
+    useEffect(() => {
         setSearch("");
         setFilteredUsers(users);
+
+        if (filterType !== "date") {
+            setStartDate("");
+            setEndDate("");
+        }
     }, [filterType, users]);
+
 
     return (
         <div className='flex h-screen overflow-hidden'>

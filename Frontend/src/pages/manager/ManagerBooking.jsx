@@ -43,6 +43,9 @@ const ManagerBooking = () => {
     const [filterType, setFilterType] = useState("all");
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
+    const [selectedServiceType, setSelectedServiceType] = useState("");
+    const [selectedTechnician, setSelectedTechnician] = useState("");
+    const [selectedRemarks, setSelectedRemarks] = useState("");
     const [selectedTechnicianId, setSelectedTechnicianId] = useState(null);
     const [showTechModal, setShowTechModal] = useState(false);
     const [showServiceDropdown, setShowServiceDropdown] = useState(false);
@@ -144,63 +147,76 @@ const ManagerBooking = () => {
 
 
     const handleSearch = () => {
-        let filtered = bookings;
-
-        if(filterType !== "all" && search.trim() !== ""){
-            const searchText = search.toLowerCase();
-
-            if(filterType === "name"){
-                filtered = filtered.filter((b) =>
-                    b.customerId?.fullname?.toLowerCase().includes(searchText)
-                );
+            let filtered = bookings;
+    
+            if(filterType !== "all" && search.trim() !== ""){
+                const searchText = search.toLowerCase();
+    
+                if(filterType === "name"){
+                    filtered = filtered.filter((b) =>
+                        b.customerId?.fullname?.toLowerCase().includes(searchText)
+                    );
+                } 
+                else if(filterType === "remarks"){
+                    filtered = filtered.filter((b) =>
+                        b.status?.toLowerCase().includes(searchText)
+                    );
+                } 
+                else if(filterType === "serviceType"){
+                    filtered = filtered.filter((b) =>
+                        b.serviceType?.name?.toLowerCase().includes(searchText)
+                    );
+                } 
+                else if(filterType === "technician"){
+                    filtered = filtered.filter((b) =>
+                        b.technicianId?.fullname?.toLowerCase().includes(searchText)
+                    );
+                }
             } 
-            else if(filterType === "remarks"){
-                filtered = filtered.filter((b) =>
+            else if(filterType === "all" && search.trim() !== ""){
+                const searchText = search.toLowerCase();
+                filtered = filtered.filter(
+                (b) =>
+                    b.customerId?.fullname?.toLowerCase().includes(searchText) ||
+                    b.serviceType?.name?.toLowerCase().includes(searchText) ||
+                    b.technicianId?.fullname?.toLowerCase().includes(searchText) ||
                     b.status?.toLowerCase().includes(searchText)
                 );
-            } 
-            else if(filterType === "serviceType"){
-                filtered = filtered.filter((b) =>
-                    b.serviceType?.name?.toLowerCase().includes(searchText)
-                );
-            } 
-            else if(filterType === "technician"){
-                filtered = filtered.filter((b) =>
-                    b.technicianId?.fullname?.toLowerCase().includes(searchText)
-                );
             }
-        } 
-        else if(filterType === "all" && search.trim() !== ""){
-            const searchText = search.toLowerCase();
-            filtered = filtered.filter(
-            (b) =>
-                b.customerId?.fullname?.toLowerCase().includes(searchText) ||
-                b.serviceType?.name?.toLowerCase().includes(searchText) ||
-                b.technicianId?.fullname?.toLowerCase().includes(searchText) ||
-                b.status?.toLowerCase().includes(searchText)
-            );
-        }
-
-        filtered = filtered.filter((b) => {
-            const bookingDate = new Date(b.date);
-            return (
-                (!startDate || bookingDate >= startDate) &&
-                (!endDate || bookingDate <= endDate)
-            );
-        });
-
-        const sorted = filtered.sort((a, b) => {
-            if(a.status === "pending" && b.status !== "pending") return -1;
-            if(a.status !== "pending" && b.status === "pending") return 1;
-            return 0;
-        });
-        setFilteredBookings(sorted);
-    };
-
-    useEffect(() => {
-        setSearch("");
-        setFilteredBookings(bookings);
-    }, [filterType, bookings]);
+    
+            filtered = filtered.filter((b) => {
+                const bookingDate = new Date(b.date);
+                return (
+                    (!startDate || bookingDate >= startDate) &&
+                    (!endDate || bookingDate <= endDate)
+                );
+            });
+    
+            const sorted = filtered.sort((a, b) => {
+                if(a.status === "pending" && b.status !== "pending") return -1;
+                if(a.status !== "pending" && b.status === "pending") return 1;
+                return 0;
+            });
+            setFilteredBookings(sorted);
+        };
+    
+        useEffect(() => {
+            setSearch("");
+            setStartDate("");
+            setEndDate("");
+    
+            setSelectedServiceType("");
+            setSelectedTechnician("");
+            setSelectedRemarks("");
+    
+            setFilteredBookings(bookings);
+        }, [
+            filterType,
+            bookings,
+            selectedServiceType,
+            selectedTechnician,
+            selectedRemarks,
+        ]);
 
 
     return (
@@ -363,8 +379,11 @@ const ManagerBooking = () => {
                                                     <div key={tech._id}
                                                         onClick={() => {
                                                             setSearch(tech.fullname);
+                                                            setStartDate(null);
+                                                            setEndDate(null);
                                                             setShowTechDropdown(false);
                                                         }}
+
                                                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                                                         {tech.fullname}
                                                     </div>
@@ -432,8 +451,11 @@ const ManagerBooking = () => {
                                                     <div key={service._id}
                                                         onClick={() => {
                                                             setSearch(service.name);
+                                                            setStartDate(null);
+                                                            setEndDate(null);
                                                             setShowServiceDropdown(false);
                                                         }}
+
                                                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                                                         {service.name}
                                                     </div>

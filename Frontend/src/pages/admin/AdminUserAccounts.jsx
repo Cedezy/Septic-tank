@@ -219,12 +219,10 @@ const AdminUserAccounts = () => {
     return (
         <div className="min-h-screen flex">
             <div className='w-full'> 
-                <div className="mb-36">
-                    <HeaderAdmin />
-                </div>
+                <HeaderAdmin /> 
                 <SidebarAdmin isCollapsed={isCollapsed} toggleCollapse={() => setIsCollapsed(prev => !prev)} />
                 <div className={`transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-72'}`}>
-                    <div className="p-6 flex flex-col gap-5"> 
+                    <div className='px-6 pb-4 flex flex-col gap-5 h-screen pt-40'> 
                         <div className='flex justify-center items-center'>
                             <span className='text-2xl tracking-tighter uppercase font-medium text-gray-700'>
                                 Manage users accounts
@@ -233,7 +231,7 @@ const AdminUserAccounts = () => {
                         <div className="bg-white rounded-sm shadow-sm overflow-hidden">
                             <div className="overflow-x-auto">
                                 <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-50">
+                                    <thead className="bg-gray-50 sticky top-0 z-10">
                                         <tr>
                                             <th className="px-6 py-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Full Name

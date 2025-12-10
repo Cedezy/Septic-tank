@@ -239,7 +239,6 @@ const AdminCustomer = () => {
                                     ) : (
                                         filteredCustomers.map(customer => (
                                             <tr key={customer._id}
-                                                onClick={() => setSelectedUser(customer)}
                                                 onDoubleClick={() => {                         
                                                     setSelectedUser(customer);
                                                     setShowModal(true);

@@ -40,7 +40,9 @@ const AdminBooking = () => {
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [search, setSearch] = useState('');
     const [filterType, setFilterType] = useState("all");
-    const [hasSelected, setHasSelected] = useState(false);
+    const [selectedServiceType, setSelectedServiceType] = useState("");
+    const [selectedTechnician, setSelectedTechnician] = useState("");
+    const [selectedRemarks, setSelectedRemarks] = useState("");
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
     const [showServiceDropdown, setShowServiceDropdown] = useState(false);
@@ -168,8 +170,22 @@ const AdminBooking = () => {
 
     useEffect(() => {
         setSearch("");
+        setStartDate("");
+        setEndDate("");
+
+        setSelectedServiceType("");
+        setSelectedTechnician("");
+        setSelectedRemarks("");
+
         setFilteredBookings(bookings);
-    }, [filterType, bookings]);
+    }, [
+        filterType,
+        bookings,
+        selectedServiceType,
+        selectedTechnician,
+        selectedRemarks,
+    ]);
+
 
 
     return (
@@ -190,7 +206,7 @@ const AdminBooking = () => {
                                 <select value={filterType} 
                                     onChange={(e) => {
                                         setFilterType(e.target.value);
-                                        setHasSelected(true); 
+                                        
                                     }}
                                     className="px-3 py-2 border-2 border-gray-400 rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none cursor-pointer w-[200px]"> 
                                     <option value="all">All</option> 
@@ -332,6 +348,8 @@ const AdminBooking = () => {
                                                     <div key={tech._id}
                                                         onClick={() => {
                                                             setSearch(tech.fullname);
+                                                            setStartDate(null);
+                                                            setEndDate(null);
                                                             setShowTechDropdown(false);
                                                         }}
                                                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
@@ -401,6 +419,8 @@ const AdminBooking = () => {
                                                     <div key={service._id}
                                                         onClick={() => {
                                                             setSearch(service.name);
+                                                            setStartDate(null);
+                                                            setEndDate(null);
                                                             setShowServiceDropdown(false);
                                                         }}
                                                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
