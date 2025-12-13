@@ -256,6 +256,7 @@ const TechSchedule = () => {
                                 <p className="text-gray-600 text-sm">View and manage your service schedules.</p>
                             </div>
                         </div>
+                        
                         <div className="flex flex-col md:flex-row gap-3 md:gap-2 items-stretch md:items-center px-4 md:px-0">
                             <div className="relative flex items-center">
                                 <span className="absolute -top-2 left-2 bg-white px-2 text-xs text-gray-600">Search by</span>

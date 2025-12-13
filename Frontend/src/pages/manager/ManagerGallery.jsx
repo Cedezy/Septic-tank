@@ -10,7 +10,7 @@ const BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 const ManagerGallery = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [services, setServices] = useState([]);
-    // Fetch services
+    
     useEffect(() => {
         const fetchServices = async () => {
             try {
