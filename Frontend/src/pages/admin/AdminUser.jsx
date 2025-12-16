@@ -242,70 +242,66 @@ const AdminUser = () => {
                                     </tr>
                                 </thead>
                                 {loading ? (
-    <SkeletonTable rows={8} columns={7} />
-) : (
-    <tbody className="bg-white divide-y divide-gray-200">
-        {users.length === 0 ? (
-            <tr>
-                <td colSpan="7" className="text-center py-16">
-                    <div className="flex flex-col items-center">
-                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                            <UserX className="w-8 h-8 text-gray-400" />
-                        </div>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">
-                            No registered customers yet!
-                        </h3>
-                        <p className="text-gray-500">
-                            Customers will appear here once they register.
-                        </p>
-                    </div>
-                </td>
-            </tr>
-        ) : filteredUsers.length === 0 ? (
-            <tr>
-                <td colSpan="7" className="text-center py-16">
-                    <div className="flex flex-col items-center">
-                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                            <UserX className="w-8 h-8 text-gray-400" />
-                        </div>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">
-                            No records found!
-                        </h3>
-                        <p className="text-gray-500">
-                            Try adjusting your search keywords.
-                        </p>
-                    </div>
-                </td>
-            </tr>
-        ) : (
-            filteredUsers.map((user, idx) => (
-                <tr
-                    key={user._id}
-                    className="hover:bg-gray-100 transition cursor-pointer"
-                    onDoubleClick={() => {
-                        setSelectedUser(user);
-                        setIsModalOpen(true);
-                    }}
-                >
-                    <td className="px-4 py-4 text-sm">{idx + 1}</td>
-                    <td className="px-4 py-6 text-sm">{user.fullname}</td>
-                    <td className="px-4 py-4 text-sm">{user.email}</td>
-                    <td className="px-4 py-4 text-sm">{user.phone}</td>
-                    <td className="px-4 py-4 text-sm">
-                        {shortFormatDate(user.birthdate)}
-                    </td>
-                    <td className="px-4 py-4 text-sm">
-                        {shortFormatDate(user.createdAt)}
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                        {user.street} {user.barangay}, {user.city}
-                    </td>
-                </tr>
-            ))
-        )}
-    </tbody>
-)}
-
+                                    <SkeletonTable rows={8} columns={7} />
+                                ) : (
+                                    <tbody className='bg-white divide-y divide-gray-200'>
+                                        {users.length === 0 ? (
+                                            <tr>
+                                                <td colSpan="7" className="text-center py-16">
+                                                    <div className="flex flex-col items-center">
+                                                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                                            <UserX className="w-8 h-8 text-gray-400" />                             
+                                                        </div>
+                                                        <h3 className="text-lg font-medium text-gray-900 mb-2">No registered customers yet!</h3>
+                                                        <p className="text-gray-500">Customers will appear here once they register.</p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ) : filteredUsers.length === 0 ? (
+                                            <tr>
+                                                <td colSpan="7" className="text-center py-16">
+                                                    <div className="flex flex-col items-center">
+                                                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                                            <UserX className="w-8 h-8 text-gray-400" />                             
+                                                        </div>
+                                                        <h3 className="text-lg font-medium text-gray-900 mb-2">No records found!</h3>
+                                                        <p className="text-gray-500">Try adjusting your search keywords.</p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            filteredUsers.map((user, idx) => (
+                                                <tr key={user._id} className={`cursor-pointer transition duration-150 ${selectedUser?._id === user._id ? 'bg-green-100' : 'hover:bg-gray-100 ease-in-out duration-300'}`}        
+                                                    onDoubleClick={() => {                         
+                                                        setSelectedUser(user);
+                                                        setIsModalOpen(true);
+                                                    }}>
+                                                    <td className="px-4 py-4 text-sm text-gray-800">
+                                                        {idx + 1}
+                                                    </td>
+                                                    <td className="px-4 py-6 text-sm text-gray-900 whitespace-nowrap">       
+                                                        {user.fullname}
+                                                    </td>
+                                                    <td className="px-4 py-4 text-sm text-gray-900">
+                                                        {user.email}
+                                                    </td>
+                                                    <td className="px-4 py-4 text-sm capitalize">
+                                                        {user.phone}
+                                                    </td>
+                                                    <td className="px-4 py-4 text-sm capitalize whitespace-nowrap">
+                                                        {shortFormatDate(user.birthdate)}
+                                                    </td>
+                                                    <td className="px-4 py-4 text-sm text-gray-900 capitalize">
+                                                        {shortFormatDate(user.createdAt)}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-gray-900">    
+                                                        {user.street} {user.barangay}, {user.city}      
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                )}
                             </table>
                             <div className="p-6 mt-10 print:block hidden">
                                 {admin && (
