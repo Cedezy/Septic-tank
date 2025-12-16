@@ -22,12 +22,10 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://192.168.0.28:5173'
-  ], 
-  credentials: true             
+  origin: process.env.CLIENT_URL,
+  credentials: true
 }));
+
 app.use((req, res, next) => {
   res.set('Cache-Control', 'no-store');
   next();
@@ -47,5 +45,5 @@ app.use('/uploads', express.static('uploads'));
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Server running at http://locahost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
