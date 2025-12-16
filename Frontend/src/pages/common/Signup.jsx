@@ -3,6 +3,7 @@ import axios from '../../lib/axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Eye, EyeOff } from "lucide-react";
+import SignupVerifyStep from "./SignupVerifyStep";
 
 const Signup = () => {
     const [email, setEmail] = useState('');
@@ -29,8 +30,19 @@ const Signup = () => {
     const [cities, setCities] = useState([]);
     const [barangays, setBarangays] = useState([]);
     const [showGenderModal, setShowGenderModal] = useState(false);
-  const [showCityModal, setShowCityModal] = useState(false);
-  const [showBarangayModal, setShowBarangayModal] = useState(false);
+    const [showCityModal, setShowCityModal] = useState(false);
+    const [showBarangayModal, setShowBarangayModal] = useState(false);
+
+    useEffect(() => {
+        const savedStep = localStorage.getItem("signup_step");
+        const savedEmail = localStorage.getItem("signup_email");
+
+        if (savedStep === "verify" && savedEmail) {
+            setEmail(savedEmail);
+            setStep(2);
+        }
+    }, []);
+
 
     const handleChange = (setter) => (e) => {
       setter(e.target.value);
@@ -84,11 +96,16 @@ const Signup = () => {
             setIsLoading(false);
             toast.success(response.data.message);
 
-            if (response.data?.user?.isVerified === false) {
+           if (response.data?.user?.isVerified === false) {
+                localStorage.setItem("signup_step", "verify");
+                localStorage.setItem("signup_email", email);
                 setStep(2);
             } else {
+                localStorage.removeItem("signup_step");
+                localStorage.removeItem("signup_email");
                 navigate("/login");
             }
+
         } catch (err) {
             setIsLoading(false);
             toast.error(err.response?.data?.message);
@@ -105,33 +122,23 @@ const Signup = () => {
         })
         .catch((err) => console.error('Error fetching cities:', err));
     }, []);
-
-    const handleCityChange = (e) => {
-        const selectedCity = e.target.value;
-        setCity(selectedCity);
-        setBarangays([]);
-
-        const cityObj = cities.find((c) => c.name === selectedCity);
-        if (cityObj) {
-        fetch(`https://psgc.gitlab.io/api/cities-municipalities/${cityObj.code}/barangays/`)
-            .then((res) => res.json())
-            .then((data) => setBarangays(data))
-            .catch((err) => console.error('Error fetching barangays:', err));
-        }
-    };
-
     // handle OTP verification
     const handleVerifyOtp = async (e) => {
         e.preventDefault();
         try {
-        const response = await axios.post('/auth/verify-otp', {
-            email,
-            signupOtp,
-        });
-        toast.success(response.data.message);
-        setTimeout(() => navigate('/home'), 2000);
+            const response = await axios.post('/auth/verify-otp', {
+                email,
+                signupOtp,
+            });
+            toast.success(response.data.message);
+
+            localStorage.removeItem("signup_step");
+            localStorage.removeItem("signup_email");
+
+            setTimeout(() => navigate('/home'), 2000);
+
         } catch (err) {
-        toast.error(err.response?.data?.message);
+            toast.error(err.response?.data?.message);
         }
     };
 
@@ -158,7 +165,6 @@ const Signup = () => {
         }
     };
  
-    // Warn user if they try to close/refresh the tab with unsaved info
     useEffect(() => {
         const handleBeforeUnload = (e) => {
             if (isFormDirty) {
@@ -540,98 +546,48 @@ const Signup = () => {
                 )}
 
                 {step === 2 && (
-                    <div className="w-full max-w-md bg-white rounded-sm shadow-md p-6">
-                        <div className="text-center mb-6">
-                            <div className="mx-auto h-12 w-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                                <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                                </svg>
-                            </div>
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2">Verify Email</h2>
-                            <p className="text-sm text-gray-600 mb-3">
-                                Enter the code sent to
-                            </p>
-                            <p className="text-sm font-medium text-green-600 bg-green-50 px-3 py-1 rounded-full inline-block">
-                                {email}
-                            </p>
-                        </div>
-
-                        <form onSubmit={handleVerifyOtp} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Verification Code</label>
-                                <input 
-                                    type="text" 
-                                    value={signupOtp} 
-                                    onChange={(e) => setSignupOtp(e.target.value)} 
-                                    placeholder="Enter 6-digit code" 
-                                    required 
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 text-center text-lg font-mono tracking-wider"
-                                    maxLength="6"
-                                />
-                            </div>
-
-                            <button 
-                                type="submit" 
-                                className="w-full bg-green-600 text-white font-medium py-2.5 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
-                            >
-                                Verify Account
-                            </button>
-
-                            <div className="text-center pt-4 border-t border-gray-200">
-                                <p className="text-sm text-gray-600 mb-2">Didn't receive the code?</p>
-                                <button 
-                                    type="button" 
-                                    onClick={handleResendOtp} 
-                                    disabled={resendDisabled} 
-                                    className="text-sm font-medium text-green-600 hover:text-green-500 disabled:text-gray-400 disabled:cursor-not-allowed"
-                                >
-                                    {resendDisabled ? (
-                                        <span className="flex items-center justify-center">
-                                                                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.37 0 0 5.37 0 12h4zm2 5.29A7.96 7.96 0 014 12H0c0 3.04 1.13 5.82 3 7.94l3-2.65z"></path>
-                                            </svg>
-                                            Resend in {timer}s
-                                        </span>
-                                    ) : (
-                                        "Resend Code"
-                                    )}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                    <SignupVerifyStep
+                        email={email}
+                        signupOtp={signupOtp}
+                        setSignupOtp={setSignupOtp}
+                        handleVerifyOtp={handleVerifyOtp}
+                        handleResendOtp={handleResendOtp}
+                        resendDisabled={resendDisabled}
+                        timer={timer}
+                    />
                 )}
+
             </div>
 
             {showLeaveModal && (
-              <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-                  <div className="bg-white rounded-lg p-6 animate-fade-in w-80 shadow-md">
-                      <h2 className="text-lg font-semibold text-gray-800 mb-2">
-                          Leave this page?
-                      </h2>
-                      <p className="text-gray-600 text-sm mb-4">
-                          Your changes will be lost if you leave now.
-                      </p>
+                <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
+                    <div className="bg-white rounded-lg p-6 animate-fade-in w-80 shadow-md">
+                        <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                            Leave this page?
+                        </h2>
+                        <p className="text-gray-600 text-sm mb-4">
+                            Your changes will be lost if you leave now.
+                        </p>
 
-                      <div className="flex justify-end gap-2">
-                          <button
-                             onClick={() => navigate(-1)}
-                              className="px-4 py-2 border rounded text-gray-700"
-                          >
-                              Yes
-                          </button>
+                        <div className="flex justify-end gap-2">
+                            <button
+                                onClick={() => navigate(-1)}
+                                className="px-4 py-2 border rounded text-gray-700"
+                            >
+                                Yes
+                            </button>
 
-                          <button
-                          onClick={() => setShowLeaveModal(false)}
-                              
-                              className="px-4 py-2 bg-red-500 text-white rounded"
-                          >
-                              No
-                          </button>
-                      </div>
-                  </div>
-              </div>
-          )}
+                            <button
+                            onClick={() => setShowLeaveModal(false)}
+                                
+                                className="px-4 py-2 bg-red-500 text-white rounded"
+                            >
+                                No
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
         </div>
     );

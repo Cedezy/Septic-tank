@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from '../../lib/axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
@@ -27,6 +27,17 @@ const ForgotPassword = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const navigate = useNavigate();
 
+    useEffect(() => {
+        const savedStep = localStorage.getItem("forgot_step");
+        const savedEmail = localStorage.getItem("forgot_email");
+
+        if (savedStep === "otp" && savedEmail) {
+            setEmail(savedEmail);
+            setStep("otp");
+        }
+    }, []);
+
+
     const handleForgotPassword = async (e) => {
         e.preventDefault();
 
@@ -39,7 +50,12 @@ const ForgotPassword = () => {
         try{
             const response = await axios.post('/auth/forgot-password', { email });
             toast.success(response.data.message);
+
+            localStorage.setItem("forgot_step", "otp");
+            localStorage.setItem("forgot_email", email);
+
             setStep('otp');
+
         } 
         catch(err){
             toast.error(err.response?.data?.message);
@@ -67,11 +83,17 @@ const ForgotPassword = () => {
             const role = response.data.role;
 
             toast.success(response.data.message);
-            setEmail('');
-            setOtp('');
-            setNewPassword('');
-            setConfirmPassword('');
-            navigate(role === 'customer' ? '/home' : '/staff/login');
+
+localStorage.removeItem("forgot_step");
+localStorage.removeItem("forgot_email");
+
+setEmail('');
+setOtp('');
+setNewPassword('');
+setConfirmPassword('');
+
+navigate(role === 'customer' ? '/home' : '/staff/login');
+
         } 
         catch(err){
             toast.error(err.response?.data?.message);
@@ -205,12 +227,16 @@ const ForgotPassword = () => {
                             <p className="text-sm text-gray-500">
                                 Didn't receive the OTP?
                                 <button
-                                    onClick={() => {
+                                   onClick={() => {
+                                        localStorage.removeItem("forgot_step");
+                                        localStorage.removeItem("forgot_email");
+
                                         setStep('email');
                                         setOtp('');
                                         setNewPassword('');
                                         setConfirmPassword('');
                                     }}
+
                                     className="ml-1 text-slate-600 hover:text-slate-700 font-medium hover:underline transition-colors duration-200 cursor-pointer">
                                     Try Again
                                 </button>
