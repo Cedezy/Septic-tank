@@ -4,22 +4,26 @@ import SidebarAdmin from '../../components/SidebarAdmin';
 import HeaderAdmin from '../../components/HeaderAdmin';
 import { formatCurrency } from '../../utils/FormatCurrency';
 import { Image } from 'lucide-react';
+import SkeletonCard from '../../components/SkeletonCard';
 
 const ManagerServices1 = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [services, setServices] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetchServices();
     }, []);
 
     const fetchServices = async () => {
-        try{
+        try {
+            setLoading(true);
             const response = await axios.get('/service');
             setServices(response.data.services); 
-        } 
-        catch(err){
+        } catch(err) {
             console.error(err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -40,7 +44,13 @@ const ManagerServices1 = () => {
                         </div>
 
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                            {services.length === 0 ? (
+                            {loading ? (
+                                // Show 6 skeleton cards while loading
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+                                    {Array.from({ length: 6 }).map((_, idx) => <SkeletonCard key={idx} />)}
+                                </div>
+                            ) : services.length === 0 ? (
+                                // No services placeholder
                                 <div className="text-center py-20">
                                     <div className="flex flex-col items-center">
                                         <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mb-6 shadow-sm">
@@ -53,16 +63,13 @@ const ManagerServices1 = () => {
                                     </div>
                                 </div>
                             ) : (
-
-                                /* SERVICE CARDS START */
+                                // Actual service cards
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
                                     {services.map((service) => (
                                         <div 
                                             key={service._id}
                                             className="relative bg-white rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-all duration-300 hover:shadow-lg"
                                         >
-
-                                            {/* --- SERVICE IMAGE DISPLAYED HERE --- */}
                                             {service.images && service.images.length > 0 ? (
                                                 <img
                                                     src={service.images[0]}
@@ -74,7 +81,6 @@ const ManagerServices1 = () => {
                                                     <Image className="w-10 h-10 text-gray-400" />
                                                 </div>
                                             )}
-                                            {/* --- END IMAGE SECTION --- */}
 
                                             <div className="p-6">
                                                 <div className="flex items-start justify-between mb-4">
@@ -134,7 +140,6 @@ const ManagerServices1 = () => {
                                         </div>
                                     ))}
                                 </div>
-                                /* SERVICE CARDS END */
                             )}
                         </div>
 

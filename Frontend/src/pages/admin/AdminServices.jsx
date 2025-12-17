@@ -6,6 +6,7 @@ import HeaderAdmin from '../../components/HeaderAdmin';
 import { formatCurrency } from '../../utils/FormatCurrency';
 import { FaTrash } from "react-icons/fa";
 import { Package, Image, Search, Timer } from 'lucide-react';
+import SkeletonCard from '../../components/SkeletonCard';
 
 const AdminServices = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -33,11 +34,14 @@ const AdminServices = () => {
 
     const fetchServices = async () => {
         try{
+            setLoading(true)
             const response = await axios.get('/service');
             setServices(response.data.services); 
         } 
         catch(err){
             console.error(err);
+        }finally {
+            setLoading(false); // ← stop loading
         }
     };
 
@@ -129,7 +133,14 @@ const AdminServices = () => {
                             </button>
                         </div>
                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 max-h-[560px] overflow-y-auto">
-                            {services.length === 0 ? (
+                          {loading ? (
+                                // ← Skeleton loader while loading
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+                                    {Array.from({ length: 6 }).map((_, idx) => (
+                                        <SkeletonCard key={idx} />
+                                    ))}
+                                </div>
+                            ) : services.length === 0 ? (
                                 <div className="text-center py-20">
                                     <div className="flex flex-col items-center">
                                         <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mb-6 shadow-sm">

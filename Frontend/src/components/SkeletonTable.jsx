@@ -3,7 +3,6 @@ import React from "react";
 const SkeletonTable = ({
     rows = 8,
     columns = 7,
-    showHeader = false,
 }) => {
     return (
         <tbody className="bg-white divide-y divide-gray-200">
