@@ -3,16 +3,19 @@ import Header from "../../components/Header";
 import { useAuth } from "../../context/AuthContext";
 import axios from "../../lib/axios";
 import Services from "../../components/Services";
+import Loading from "../../components/Loading";
 
 const Home = () => {
-    const { user, loading } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const [services, setServices] = useState([]);
     const [images, setImages] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [loading, setLoading] = useState(true); 
 
     useEffect(() => {
         const fetchImages = async () => {
             try {
+                setLoading(true); 
                 const res = await axios.get("/service");
                 const allImages = [];
                 const filteredServices = res.data.services.filter(
@@ -32,6 +35,8 @@ const Home = () => {
 
             } catch (err) {
                 console.error("Failed to fetch images", err);
+            }finally {
+                setLoading(false); // stop loading
             }
         };
 
@@ -49,20 +54,16 @@ const Home = () => {
         return () => clearInterval(interval);
     }, [images]);
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-50">
-                Loading...
-            </div>
-        );
-    }
-
     const heroLinks = [
         { label: "Services", href: "/services" },
         { label: "About Us", href: "/aboutus" },
         { label: "FAQs", href: "/faqs" },
         { label: "Contact Us", href: "/contactus" },
     ];
+
+    if (authLoading || loading) {
+        return <Loading />;
+    }
 
     return (
         <div className="min-h-screen w-full relative">
