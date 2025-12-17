@@ -67,13 +67,11 @@ const AdminServices = () => {
             if(editingId){
                 response = await axios.put(`/service/${editingId}`, dataToSend, {
                     withCredentials: true,
-                    headers: { "Content-Type": "multipart/form-data" },
                 });
             } 
             else{
                 response = await axios.post("/service", dataToSend, {
                     withCredentials: true,
-                    headers: { "Content-Type": "multipart/form-data" },
                 });
             }
             toast.success(response.data.message);
