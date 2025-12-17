@@ -159,6 +159,14 @@ const CustomerDashboard = () => {
         }
     };
 
+    if(loading){
+        return (
+            <div className='flex items-center justify-center min-h-screen'>
+                <Loading/>
+            </div>
+        );
+    }
+
     return (
          <div className="min-h-screen bg-gray-50 pt-18">
             <Header />
