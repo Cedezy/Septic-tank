@@ -6,8 +6,6 @@ import Slider from "react-slick";
 import { ChevronLeft, ChevronRight, X, Upload, Trash2, Image as ImageIcon } from "lucide-react";
 import { toast } from "react-toastify";
 
-const BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
-
 const AdminGallery = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [services, setServices] = useState([]);
@@ -179,7 +177,7 @@ const AdminGallery = () => {
                                             {service.images.map((img, index) => (
                                                 <div key={index} className="relative">
                                                     <img
-                                                        src={`${BASE_URL}${img}`}
+                                                        src={img}
                                                         alt={`${service.name}-${index}`}
                                                         className="w-full h-64 object-cover"
                                                     />
@@ -237,7 +235,7 @@ const AdminGallery = () => {
                                         {editedImages.map((img, index) => (
                                             <div key={index} className="relative group">
                                                 <img
-                                                    src={`${BASE_URL}${img}`}
+                                                    src={img}
                                                     alt={`current-${index}`}
                                                     className="w-full h-32 object-cover rounded-lg shadow-md"
                                                 />
