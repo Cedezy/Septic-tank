@@ -18,8 +18,6 @@ import {
     Printer
 } from 'lucide-react';
 
-const BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
-
 const CustomerBooking = () => {
     const [bookings, setBookings] = useState([]);
     const [filteredBookings, setFilteredBookings] = useState([]);

@@ -3,6 +3,7 @@ import axios from '../../lib/axios';
 import Header from '../../components/Header'
 import { toast } from 'react-toastify';
 import { formatDate } from '../../utils/FormatDate';
+import Loading from '../../components/Loading';
 import {
     Mail, 
     User, 
@@ -22,6 +23,7 @@ const CustomerDashboard = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({
         fullname: '',
         email: '',
@@ -45,6 +47,7 @@ const CustomerDashboard = () => {
 
     useEffect(() => {
         const fetchCustomer = async () => {
+            setLoading(true);
             try {
                 const response = await axios.get('/user/me', {
                     withCredentials: true
@@ -66,6 +69,9 @@ const CustomerDashboard = () => {
                 setCustomerId(user._id);
             } catch (err) {
                 console.error('Error fetching user data:', err);
+            }
+            finally{
+                setLoading(false);
             }
         };
         fetchCustomer();
