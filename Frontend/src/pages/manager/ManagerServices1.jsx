@@ -5,8 +5,6 @@ import HeaderAdmin from '../../components/HeaderAdmin';
 import { formatCurrency } from '../../utils/FormatCurrency';
 import { Image } from 'lucide-react';
 
-const BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
-
 const ManagerServices1 = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [services, setServices] = useState([]);
@@ -67,7 +65,7 @@ const ManagerServices1 = () => {
                                             {/* --- SERVICE IMAGE DISPLAYED HERE --- */}
                                             {service.images && service.images.length > 0 ? (
                                                 <img
-                                                    src={`${BASE_URL}${service.images[0]}`}
+                                                    src={service.images[0]}
                                                     alt={service.name}
                                                     className="w-full h-48 object-cover rounded-t-xl"
                                                 />

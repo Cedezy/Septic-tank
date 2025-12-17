@@ -7,8 +7,6 @@ import { formatCurrency } from '../../utils/FormatCurrency';
 import { FaTrash } from "react-icons/fa";
 import { Package, Image, Search, Timer } from 'lucide-react';
 
-const BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
-
 const AdminServices = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [services, setServices] = useState([]);
@@ -27,6 +25,7 @@ const AdminServices = () => {
     const [selectedService, setSelectedService] = useState(null);
     const [showImageModal, setShowImageModal] = useState(false);
     const [imageService, setImageService] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         fetchServices();
@@ -44,6 +43,7 @@ const AdminServices = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
 
         const dataToSend = new FormData();
         dataToSend.append("name", formData.name);
@@ -84,6 +84,9 @@ const AdminServices = () => {
         } 
         catch(err){
             console.log(err);
+        }
+        finally {
+            setLoading(false); // stop loading
         }
     };
 
@@ -167,7 +170,7 @@ const AdminServices = () => {
                                                             {service.images.map((img, idx) => (
                                                                 <img
                                                                     key={idx}
-                                                                    src={`${BASE_URL}${img}`}
+                                                                    src={img}
                                                                     className="w-full h-48 object-cover flex-shrink-0"
                                                                 />
                                                             ))}
@@ -305,7 +308,7 @@ const AdminServices = () => {
                                                         {formData.existingImages.map((img, idx) => (
                                                             <div key={idx} className="relative group">
                                                                 <img
-                                                                    src={`${BASE_URL}${img}`}
+                                                                    src={img}
                                                                     alt={`Service ${idx + 1}`}
                                                                     className="w-20 h-20 object-cover rounded-lg border-2 border-gray-200 group-hover:border-red-300 transition-colors"
                                                                 />
@@ -482,12 +485,22 @@ const AdminServices = () => {
                                             >
                                                 Cancel
                                             </button>
-                                            <button
+                                           <button
                                                 type="submit"
                                                 onClick={handleSubmit}
-                                                className="px-6 py-2.5 bg-green-600 text-white rounded-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 font-medium shadow-lg hover:shadow-xl cursor-pointer text-sm"
+                                                disabled={loading} // disable while loading
+                                                className={`px-6 py-2.5 bg-green-600 text-white rounded-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 font-medium shadow-lg hover:shadow-xl cursor-pointer text-sm ${
+                                                    loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-green-700'
+                                                }`}
                                             >
-                                                {editingId ? 'Update Service' : 'Submit'}
+                                                {loading ? (
+                                                    <svg className="animate-spin h-5 w-5 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4l-3 3 3 3h-4z"></path>
+                                                    </svg>
+                                                ) : (
+                                                    editingId ? 'Update Service' : 'Submit'
+                                                )}
                                             </button>
                                         </div>
                                     </div>
@@ -539,7 +552,7 @@ const AdminServices = () => {
                                                     <div key={idx} className="group relative bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300">
                                                         <div className="aspect-w-16 aspect-h-12 relative">
                                                             <img
-                                                                src={`${BASE_URL}${img}`}
+                                                                src={img}
                                                                 alt={`${imageService.name} - Image ${idx + 1}`}
                                                                 className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
                                                             />
@@ -555,7 +568,7 @@ const AdminServices = () => {
                                                             <div className="flex space-x-1">
                                                                <button type="button"
                                                                     onClick={() => {
-                                                                        window.open(`${BASE_URL}${img}`, "_blank");
+                                                                        window.open(`${img}`, "_blank");
                                                                     }}
                                                                     className="p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-colors duration-200 shadow-sm cursor-pointer"
                                                                     title="View full size"

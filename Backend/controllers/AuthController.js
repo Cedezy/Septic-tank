@@ -107,7 +107,7 @@ exports.login = async (req, res) => {
         }
 
         const token = createSecretToken(user._id, user.role);
-
+        
         res.cookie('token', token, {
             httpOnly: true,
             secure: true,        // HTTPS only

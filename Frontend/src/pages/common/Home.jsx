@@ -4,8 +4,6 @@ import { useAuth } from "../../context/AuthContext";
 import axios from "../../lib/axios";
 import Services from "../../components/Services";
 
-const BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
-
 const Home = () => {
     const { user, loading } = useAuth();
     const [services, setServices] = useState([]);
@@ -17,20 +15,20 @@ const Home = () => {
             try {
                 const res = await axios.get("/service");
                 const allImages = [];
-const filteredServices = res.data.services.filter(
-    (service) => service.status === "Active" && service.showOnHome === true
-);
+                const filteredServices = res.data.services.filter(
+                    (service) => service.status === "Active" && service.showOnHome === true
+                );
 
-filteredServices.forEach((service) => {
-    if (service.images?.length > 0) {
-        service.images.forEach((img) =>
-            allImages.push(`${BASE_URL}${img}`)
-        );
-    }
-});
+                filteredServices.forEach((service) => {
+                    if (service.images?.length > 0) {
+                        service.images.forEach((img) =>
+                            allImages.push(img)
+                        );
+                    }
+                });
 
-setImages(allImages);
-setServices(filteredServices);
+                setImages(allImages);
+                setServices(filteredServices);
 
             } catch (err) {
                 console.error("Failed to fetch images", err);

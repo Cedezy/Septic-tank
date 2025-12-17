@@ -11,8 +11,6 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
 
-const BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
-
 const Services = ({ showHomeOnly = false }) => {
     const [services, setServices] = useState([]);
     const [selectedService, setSelectedService] = useState(null);
@@ -221,7 +219,7 @@ const Services = ({ showHomeOnly = false }) => {
                                             {service.images.map((img, i) => (
                                                 <div key={`${service._id}-${i}`}>
                                                     <div className="relative group">
-                                                        <img src={`${BASE_URL}${img}`} alt={`${service.name}-${i}`}
+                                                        <img src={img} alt={`${service.name}-${i}`}
                                                         className="w-full h-64 object-cover rounded-xl transform group-hover:scale-105 transition-transform duration-500" />
                                                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
                                                         <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-gray-700 text-xs font-semibold px-2.5 py-1 rounded-full shadow">

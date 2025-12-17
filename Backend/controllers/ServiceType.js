@@ -1,12 +1,12 @@
 const ServiceType = require('../models/ServiceType');
-const fs = require("fs");
-const path = require("path");
+const cloudinary = require("cloudinary").v2;
+
 
 exports.createServiceType = async (req, res) => {
   try {
     const { name, description, price, duration, showOnHome } = req.body;
 
-    const imagePaths = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
+    const imagePaths = req.files ? req.files.map(file => file.path) : [];
 
     const service = new ServiceType({
       name,
@@ -55,19 +55,22 @@ exports.updateServiceType = async (req, res) => {
     const service = await ServiceType.findById(req.params.id);
     if (!service) return res.status(404).json({ message: "Service not found" });
 
-    const imagePaths = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
+    const newImages = req.files ? req.files.map(file => file.path) : [];
     let updatedImages = [...service.images];
 
+    // Remove images from Cloudinary
     if (removedImages) {
       const removed = JSON.parse(removedImages);
+
+      for (const imgUrl of removed) {
+        const publicId = imgUrl.split("/").pop().split(".")[0];
+        await cloudinary.uploader.destroy(`service-types/${publicId}`);
+      }
+
       updatedImages = updatedImages.filter(img => !removed.includes(img));
-      removed.forEach(imgPath => {
-        const fullPath = path.join(__dirname, `../${imgPath}`);
-        if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
-      });
     }
 
-    updatedImages = [...updatedImages, ...imagePaths];
+    updatedImages = [...updatedImages, ...newImages];
 
     service.name = name || service.name;
     service.description = description || service.description;
@@ -83,6 +86,7 @@ exports.updateServiceType = async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
 
 exports.updateServiceStatus = async (req, res) => { 
   try{ const { status } = req.body; 

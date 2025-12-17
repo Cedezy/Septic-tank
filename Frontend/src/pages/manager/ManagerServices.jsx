@@ -4,8 +4,6 @@ import SidebarManager from '../../components/SidebarManager';
 import HeaderAdmin from '../../components/HeaderAdmin';
 import { formatCurrency } from '../../utils/FormatCurrency';
 
-const BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
-
 const ManagerServices = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [services, setServices] = useState([]);
@@ -72,7 +70,7 @@ const ManagerServices = () => {
                                                             {service.images.map((img, idx) => (
                                                                 <img 
                                                                     key={idx}
-                                                                    src={`${BASE_URL}${img}`}
+                                                                    src={img}
                                                                     className="w-full h-48 object-cover flex-shrink-0"
                                                                 />
                                                             ))}

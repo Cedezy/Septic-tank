@@ -7,8 +7,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-const BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
-
 const AdminDashboard = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [services, setServices] = useState([]);
@@ -72,7 +70,7 @@ const AdminDashboard = () => {
                                         <div key={`${service._id}-${i}`} className="px-4">
                                             <div className="relative overflow-hidden rounded-3xl shadow-2xl group">
                                                 <img
-                                                    src={`${BASE_URL}${img}`}
+                                                    src={img}
                                                     alt={`${service.name}-${i}`}
                                                     className="w-full h-[75vh] object-cover transition-transform duration-700 group-hover:scale-105"
                                                 />

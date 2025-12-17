@@ -5,8 +5,6 @@ import axios from "../../lib/axios";
 import Slider from "react-slick";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
-const BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
-
 const ManagerGallery = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [services, setServices] = useState([]);
@@ -79,7 +77,7 @@ const ManagerGallery = () => {
                                         {service.images.map((img, index) => (
                                             <div key={index}>
                                                 <img
-                                                    src={`${BASE_URL}${img}`}
+                                                    src={img}
                                                     alt={`${service.name}-${index}`}
                                                     className="w-full h-52 object-cover rounded-t-md"
                                                 />

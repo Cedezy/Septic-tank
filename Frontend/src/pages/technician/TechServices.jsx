@@ -4,8 +4,6 @@ import SidebarTech from '../../components/SidebarTech';
 import { formatCurrency } from '../../utils/FormatCurrency';
 import { Image } from 'lucide-react';
 
-const BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
-
 const TechServices = () => {
     const [services, setServices] = useState([]);
 
@@ -58,7 +56,7 @@ const TechServices = () => {
                                         {/* --- SERVICE IMAGE DISPLAYED HERE --- */}
                                         {service.images && service.images.length > 0 ? (
                                             <img
-                                                src={`${BASE_URL}${service.images[0]}`}
+                                                src={service.images[0]}
                                                 alt={service.name}
                                                 className="w-full h-48 object-cover rounded-t-xl"
                                             />

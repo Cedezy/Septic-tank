@@ -47,16 +47,6 @@ const CustomerBooking = () => {
         fetchBookings();
     }, []);
 
-    const getStatusIcon = (status) => {
-        switch (status) {
-            case 'pending': return <Clock className="w-4 h-4 text-amber-500" />;
-            case 'confirmed': return <Calendar className="w-4 h-4 text-blue-600" />;
-            case 'in-progress': return <Calendar className="w-4 h-4 text-yellow-600" />;
-            case 'completed': return <CheckCircle className="w-4 h-4 text-green-600" />;
-            default: return <AlertCircle className="w-4 h-4 text-gray-400" />;
-        }
-    };
-
     const cancelBooking = async (bookingId) => {
         try {
             const response = await axios.put(`/book/cancel/${bookingId}`, {}, { withCredentials: true });
@@ -410,7 +400,7 @@ const CustomerBooking = () => {
                                                 >
                                                     <div className="relative">
                                                         <img
-                                                            src={`${BASE_URL}/${img}`}
+                                                            src={img}
                                                             alt={`Service Proof ${index + 1}`}
                                                             className="w-full h-56 object-cover"
                                                         />
@@ -420,7 +410,7 @@ const CustomerBooking = () => {
                                                     <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                                         <button
                                                             type="button"
-                                                            onClick={() => window.open(`${BASE_URL}/${img}`, "_blank")}
+                                                            onClick={() => window.open(`${img}`, "_blank")}
                                                             className="p-2.5 bg-white rounded-lg hover:bg-green-50 transition-colors duration-200 shadow-lg cursor-pointer"
                                                             title="View full size"
                                                         >
