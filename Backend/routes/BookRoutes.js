@@ -18,7 +18,7 @@ router.put('/technician/respond/:bookingId', userVerification, respondToBooking)
 router.put('/technician/update/:bookingId', userVerification, updateBookingStatusByTechnician);
 router.put('/technician/service/:bookingId', userVerification, updateServiceTypeByTechnician);
 router.put('/technician/cancel/:bookingId', userVerification, cancelBookingByTechnician);
-router.post('/technician/proof/:bookingId', upload.array("proofImages", 5), userVerification, uploadProof);
+router.post('/technician/proof/:bookingId', upload.single("proofImages"), userVerification, uploadProof);
 
 module.exports = router; 
 

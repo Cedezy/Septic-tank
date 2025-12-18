@@ -1,7 +1,6 @@
 const ServiceType = require('../models/ServiceType');
 const cloudinary = require("cloudinary").v2;
 
-
 exports.createServiceType = async (req, res) => {
   try {
     const { name, description, price, duration, showOnHome } = req.body;

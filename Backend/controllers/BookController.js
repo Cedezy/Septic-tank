@@ -197,8 +197,6 @@ exports.assignTechnician = async (req, res) => {
     }
 };
 
-
-
 exports.getAssignedTechnician = async (req, res) => {
     try {
         const technicianId = req.user._id;
@@ -296,7 +294,6 @@ exports.respondToBooking = async (req, res) => {
     }
 };
 
-
 exports.updateBookingStatusByTechnician = async (req, res) => {
     try{
         const bookingId = req.params.bookingId;
@@ -388,7 +385,6 @@ exports.updateServiceTypeByTechnician = async (req, res) => {
     }
 };
 
-
 exports.getAvailableTimeSlots = async (req, res) => {
     try {
         const { date } = req.query;
@@ -417,8 +413,6 @@ exports.getAvailableTimeSlots = async (req, res) => {
         res.status(500).json({ message: 'Failed to fetch available time slots', success: false });
     }
 };
-
-
 
 exports.getBookingHistoryByCustomer = async (req, res) => {
     try {
@@ -490,33 +484,28 @@ exports.cancelBookingByCustomer = async (req, res) => {
     }
 };
 
-
-
 exports.uploadProof = async (req, res) => {
     try {
         const { bookingId } = req.params;
-        const { receiptNumber } = req.body; // get OR number from frontend
+        const { receiptNumber } = req.body; 
 
         const booking = await Booking.findById(bookingId);
-
-        if(!booking){
-            return res.status(404).json({ success: false, message: 'Booking not found' });
-        }
-
-        if (booking.technicianId.toString() !== req.user._id.toString()){
+        if(!booking) return res.status(404).json({ success: false, message: 'Booking not found' });
+        if (booking.technicianId.toString() !== req.user._id.toString())
             return res.status(403).json({ success: false, message: 'Unauthorized: Not assigned technician' });
+
+        if (req.file) {
+            // req.file.path is a Cloudinary URL when using your upload.js
+            booking.proofImages = [req.file.path]; // overwrite or push if array
         }
 
-        const proofFiles = req.files.map(file => file.path); 
-        booking.proofImages.push(...proofFiles);
-
-        if(receiptNumber) booking.receiptNumber = receiptNumber; // save OR number
+        if(receiptNumber) booking.receiptNumber = receiptNumber;
 
         await booking.save();
 
         res.status(200).json({ success: true, message: 'Proof uploaded successfully', booking });
-    } 
-    catch(err){
+    } catch(err){
+        console.error(err);
         res.status(500).json({ success: false, message: 'Error uploading proof' });
     }
 };
