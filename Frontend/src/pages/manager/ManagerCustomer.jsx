@@ -604,7 +604,7 @@ const ManagerCustomer = () => {
                                                     >
                                                         <div className="relative">
                                                             <img
-                                                                src={`${BASE_URL}/${img}`}
+                                                                src={img}
                                                                 alt={`Service Proof ${index + 1}`}
                                                                 className="w-full h-56 object-cover"
                                                             />
@@ -614,7 +614,7 @@ const ManagerCustomer = () => {
                                                         <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                                             <button
                                                                 type="button"
-                                                                onClick={() => window.open(`${BASE_URL}/${img}`, "_blank")}
+                                                                onClick={() => window.open(`${img}`, "_blank")}
                                                                 className="p-2.5 bg-white rounded-lg hover:bg-green-50 transition-colors duration-200 shadow-lg cursor-pointer"
                                                                 title="View full size"
                                                             >
