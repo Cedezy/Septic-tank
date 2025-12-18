@@ -11,8 +11,6 @@ import { getStatusBadge } from '../../utils/BookingStats';
 import logo from '../../assets/logo.png'
 import SkeletonTable from '../../components/SkeletonTable';
 
-const BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
-
 const AdminCustomer = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [customers, setCustomers] = useState([]);
