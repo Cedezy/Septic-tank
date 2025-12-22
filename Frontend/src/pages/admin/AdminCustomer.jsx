@@ -218,7 +218,7 @@ const AdminCustomer = () => {
                                     </tr>
                                 </thead>
                                 {loading ? (
-                                    <SkeletonTable rows={8} columns={7} />
+                                    <SkeletonTable rows={8} columns={5} />
                                 ) : (
                                     <tbody className="bg-white divide-y divide-gray-200">
                                         {customers.length === 0 ? (
