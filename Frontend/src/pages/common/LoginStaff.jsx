@@ -121,7 +121,10 @@ const LoginStaff = () => {
                                         {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                                     </button>
                                 </div>
-                                <Link to='/forgot-password' className='flex justify-end cursor-pointer'>
+                                <Link to='/forgot-password'  onClick={() => {
+                                        localStorage.removeItem("forgot_step");
+                                        localStorage.removeItem("forgot_email");
+                                    }} className='flex justify-end cursor-pointer'>
                                     <span className='text-sm hover:underline'>Forgot Password?</span>
                                 </Link>
                             </div>

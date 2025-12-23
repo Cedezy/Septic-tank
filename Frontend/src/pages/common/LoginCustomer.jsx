@@ -119,7 +119,10 @@ const LoginCustomer = () => {
                     </div>
 
                     <div className="text-right">
-                        <Link to="/forgot-password" className="text-sm text-gray-700 hover:underline">
+                        <Link to="/forgot-password"  onClick={() => {
+                                localStorage.removeItem("forgot_step");
+                                localStorage.removeItem("forgot_email");
+                            }} className="text-sm text-gray-700 hover:underline">
                             Forgot Password?
                         </Link>
                     </div>
